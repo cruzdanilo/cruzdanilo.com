@@ -2,6 +2,11 @@
   "name": "cruzdanilo",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "start": "hexo server",
+    "generate": "hexo generate",
+    "deploy": "hexo deploy"
+  },
   "hexo": {
     "version": "3.5.0"
   },
