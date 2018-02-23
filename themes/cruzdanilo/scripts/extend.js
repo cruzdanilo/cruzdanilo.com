@@ -40,7 +40,7 @@ function webpack() {
   compiler.outputFileSystem = fs;
   compiler.options = new WebpackOptionsApply().process(options, compiler);
   watching = compiler.watch(null, (err, stats) => {
-    stats.toString({ colors: true }).split('\n').forEach(l => hexo.log.debug(`webpack: ${l}`));
+    stats.toString({ colors: true }).split('\n').forEach(l => hexo.log.info(`webpack: ${l}`));
     if (!hexo.theme.isWatching()) return;
     hexo.theme.watcher.emit('change', path.join(context, compiler.options.entry));
   });

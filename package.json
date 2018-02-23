@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "hexo server --debug",
-    "generate": "hexo generate --debug",
+    "start": "hexo server",
+    "generate": "hexo generate",
     "deploy": "hexo deploy",
     "clean": "hexo clean"
   },
