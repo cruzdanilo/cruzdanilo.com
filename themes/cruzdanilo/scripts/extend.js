@@ -8,13 +8,16 @@ const {
 } = require('webpack');
 const path = require('path');
 const MemoryFileSystem = require('memory-fs');
+const TexturePackerPlugin = require('texture-packer-webpack-plugin');
 
 let watching;
 let routes;
+let texturepacker;
 const resolves = [];
 
 function webpack() {
   const context = path.resolve(__dirname, '../lib/');
+  const outputPath = 'assets/';
   const options = new WebpackOptionsDefaulter().process({
     context,
     entry: './main.js',
@@ -32,24 +35,8 @@ function webpack() {
             },
           },
         },
-        {
-          test: /\.png$/,
-          use: {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'assets/',
-            },
-          },
-        },
-        {
-          test: /\.bdf$/,
-          use: {
-            loader: 'bdf2fnt-loader',
-            options: {
-              outputPath: 'assets/',
-            },
-          },
-        },
+        { test: /\.png$/, use: TexturePackerPlugin.loader({ outputPath }) },
+        { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
       ],
     },
     node: { fs: 'empty' },
@@ -58,7 +45,9 @@ function webpack() {
   new NodeEnvironmentPlugin().apply(compiler);
   compiler.outputFileSystem = new MemoryFileSystem();
   compiler.options = new WebpackOptionsApply().process(options, compiler);
-  compiler.hooks.emit.tapAsync('cruzdanilo', (compilation, callback) => {
+  texturepacker = new TexturePackerPlugin({ outputPath });
+  texturepacker.apply(compiler);
+  compiler.hooks.afterEmit.tapAsync('cruzdanilo', (compilation, callback) => {
     routes = Object.entries(compilation.assets).map(([k, v]) => ({
       path: k,
       data: v.source(),
@@ -85,6 +74,10 @@ hexo.extend.generator.register('cruzdanilo', () => {
 
 hexo.on('generateBefore', () => {
   if (!watching) webpack();
+});
+
+hexo.extend.helper.register('main', function main() {
+  return `<script>const atlas = ${JSON.stringify(texturepacker.output)};</script>${this.js('main.js')}`;
 });
 
 hexo.extend.helper.register('cover', function cover(item) {

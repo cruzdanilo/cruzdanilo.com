@@ -19,6 +19,7 @@ export default class Scene extends cc.Scene {
         cc.rect(rect.x + (i * 32) + 8, rect.y + 32 + 8, 16, 24),
       );
     }
+    this.player.setSpriteFrame(animation.getFrames()[0].getSpriteFrame());
     this.player.runAction(cc.animate(animation).repeatForever());
 
     this.title = new cc.LabelBMFont('danilo neves cruz', pressStart2p);
