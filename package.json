@@ -5,7 +5,7 @@
   "scripts": {
     "start": "hexo server",
     "generate": "hexo generate",
-    "deploy": "hexo deploy",
+    "deploy": "hexo deploy -g",
     "clean": "hexo clean"
   },
   "hexo": {
