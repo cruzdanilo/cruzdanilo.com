@@ -2,6 +2,7 @@
 title: gm prisma jump | 2008 | edgy
 date: 2018-02-08 19:18:39
 tags:
+cover_image: screen00.jpg
 ---
 3d racing game
 role: game developer
