@@ -1,4 +1,6 @@
 import cc from 'cocos2d-html5';
+import pressStart2p from './assets/press-start-2p.bdf';
+import Scene from './scene';
 
 function updateSize() {
   const size = cc.view.getFrameSize();
@@ -25,4 +27,10 @@ cc.game.run({
   updateSize();
   cc.view.setResizeCallback(updateSize);
   cc.view.resizeWithBrowserSize(true);
+  cc.LoaderScene.preload([
+    pressStart2p,
+  ], () => {
+    setupPixelPerfectRendering();
+    cc.director.runScene(new Scene());
+  });
 });

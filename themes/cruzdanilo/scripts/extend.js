@@ -10,9 +10,11 @@ const path = require('path');
 const MemoryFileSystem = require('memory-fs');
 
 let watching;
+let routes;
+const resolves = [];
 
 function webpack() {
-  const context = path.resolve(__dirname, '../source/');
+  const context = path.resolve(__dirname, '../lib/');
   const options = new WebpackOptionsDefaulter().process({
     context,
     entry: './main.js',
@@ -30,16 +32,43 @@ function webpack() {
             },
           },
         },
+        {
+          test: /\.png$/,
+          use: {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'assets/',
+            },
+          },
+        },
+        {
+          test: /\.bdf$/,
+          use: {
+            loader: 'bdf2fnt-loader',
+            options: {
+              outputPath: 'assets/',
+            },
+          },
+        },
       ],
     },
     node: { fs: 'empty' },
   });
   const compiler = new Compiler(context);
   new NodeEnvironmentPlugin().apply(compiler);
-  const fs = new MemoryFileSystem();
-  compiler.outputFileSystem = fs;
+  compiler.outputFileSystem = new MemoryFileSystem();
   compiler.options = new WebpackOptionsApply().process(options, compiler);
+  compiler.hooks.emit.tapAsync('cruzdanilo', (compilation, callback) => {
+    routes = Object.entries(compilation.assets).map(([k, v]) => ({
+      path: k,
+      data: v.source(),
+    }));
+    resolves.forEach(resolve => resolve(routes));
+    resolves.length = 0;
+    callback();
+  });
   watching = compiler.watch(null, (err, stats) => {
+    if (err) throw err;
     stats.toString({ colors: true }).split('\n').forEach(l => hexo.log.info(`webpack: ${l}`));
     if (!hexo.theme.isWatching()) return;
     hexo.theme.watcher.emit('change', path.join(context, compiler.options.entry));
@@ -47,12 +76,12 @@ function webpack() {
   hexo.on('exit', () => {
     if (!hexo.theme.isWatching()) watching.close();
   });
-  hexo.extend.renderer.register('js', 'js', (data, opts, cb) => {
-    if (watching.running) {
-      watching.callbacks.push(() => cb(null, fs.readFileSync(data.path).toString()));
-    } else cb(null, fs.readFileSync(data.path).toString());
-  });
 }
+
+hexo.extend.generator.register('cruzdanilo', () => {
+  if (watching.running) return new Promise(r => resolves.push(r));
+  return routes;
+});
 
 hexo.on('generateBefore', () => {
   if (!watching) webpack();
