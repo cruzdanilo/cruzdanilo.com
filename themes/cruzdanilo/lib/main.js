@@ -4,6 +4,7 @@ import pressStart2p from './assets/press-start-2p.bdf';
 import Scene from './scene';
 
 function updateSize() {
+  window.scrollTo(0, 1);
   const size = cc.view.getFrameSize();
   cc.view.setDesignResolutionSize(size.width, size.height, cc.ResolutionPolicy.EXACT_FIT);
 }
