@@ -54,14 +54,15 @@ function webpack() {
       data: v.source(),
     }));
     resolves.forEach(resolve => resolve(routes));
-    resolves.length = 0;
+    if (resolves.length) {
+      resolves.length = 0;
+      routes = null;
+    } else if (hexo.theme.isWatching()) hexo.theme.emit('processAfter');
     callback();
   });
   watching = compiler.watch(null, (err, stats) => {
     if (err) throw err;
     stats.toString({ colors: true }).split('\n').forEach(l => hexo.log.info(`webpack: ${l}`));
-    if (!hexo.theme.isWatching()) return;
-    hexo.theme.watcher.emit('change', path.join(context, compiler.options.entry));
   });
   hexo.on('exit', () => {
     if (!hexo.theme.isWatching()) watching.close();
@@ -70,7 +71,9 @@ function webpack() {
 
 hexo.extend.generator.register('cruzdanilo', () => {
   if (watching.running) return new Promise(r => resolves.push(r));
-  return routes;
+  const res = routes;
+  routes = null;
+  return res;
 });
 
 hexo.on('generateBefore', () => {
