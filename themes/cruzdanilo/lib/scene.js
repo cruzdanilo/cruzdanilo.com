@@ -1,10 +1,28 @@
 import cc from 'cocos2d-html5';
+import cave from './assets/cave.png';
 import characters from './assets/characters.png';
 import pressStart2p from './assets/press-start-2p.bdf';
 
 export default class Scene extends cc.Scene {
   constructor() {
     super();
+
+    const caveSprite = new cc.Sprite(cave);
+    const caveRect = caveSprite.getTextureRect();
+    const caveFrame = new cc.SpriteFrame(
+      caveSprite.getTexture(),
+      cc.rect(caveRect.x + 0, caveRect.y + 144, 32, 32),
+    );
+    for (let i = 0; i < 16; i += 1) {
+      for (let j = 0; j < 16; j += 1) {
+        const tile = new cc.Sprite(caveFrame);
+        tile.setScale(2);
+        tile.setAnchorPoint(0, 0);
+        tile.setPosition(i * 32 * 2, j * 32 * 2);
+        this.addChild(tile);
+      }
+    }
+
     this.player = new cc.Sprite(characters);
     this.player.setScale(2);
     this.player.setAnchorPoint(0.5, 0);
