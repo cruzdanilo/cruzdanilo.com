@@ -82,6 +82,11 @@ hexo.on('generateBefore', () => {
 
 hexo.extend.helper.register('main', function main() {
   return `<script>
+const articles = [];
+Array.from(document.getElementsByTagName('article')).forEach((e) => {
+  articles.push(e);
+  e.style.display = 'none';
+});
 const atlas = ${JSON.stringify(texturepacker.output, null, 2)};
   </script>
   ${this.js('main.js')}`;
