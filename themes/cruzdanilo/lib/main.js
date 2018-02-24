@@ -20,6 +20,9 @@ function setupPixelPerfectRendering() {
   /* eslint-enable no-underscore-dangle */
 }
 
+Array.from(document.getElementsByTagName('article')).forEach((e) => {
+  e.style.display = 'none';
+});
 cc.game.run({
   id: 'canvas',
   debugMode: 1, // DEBUG

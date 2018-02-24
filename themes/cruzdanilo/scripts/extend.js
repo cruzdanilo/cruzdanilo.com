@@ -81,7 +81,10 @@ hexo.on('generateBefore', () => {
 });
 
 hexo.extend.helper.register('main', function main() {
-  return `<script>const atlas = ${JSON.stringify(texturepacker.output)};</script>${this.js('main.js')}`;
+  return `<script>
+const atlas = ${JSON.stringify(texturepacker.output, null, 2)};
+  </script>
+  ${this.js('main.js')}`;
 });
 
 hexo.extend.helper.register('cover', function cover(item) {

@@ -1,5 +1,5 @@
 <% page.posts.forEach(item => { %>
-  <a href="<%- config.root %><%- item.path %>">
-    <img src="<%- cover(item) %>" alt="<%- item.title %>">
-  </a>
-<% }); %>
+  <article>
+    <h1><%- item.title %></h1>
+    <h2><%- item.path %></h2>
+  </article><% }); %>
