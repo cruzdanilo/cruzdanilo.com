@@ -24,7 +24,7 @@ Array.from(document.getElementsByTagName('article')).forEach((e) => {
   e.style.display = 'none';
 });
 cc.game.run({
-  id: 'canvas',
+  id: 'body',
   debugMode: 1, // DEBUG
 }, () => {
   cc.director.setProjection(cc.Director.PROJECTION_2D);
