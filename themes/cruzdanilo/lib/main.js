@@ -22,13 +22,13 @@ function setupPixelPerfectRendering() {
 
 cc.game.run({
   id: 'canvas',
-  debugMode: 1,
+  debugMode: 1, // DEBUG
 }, () => {
   cc.director.setProjection(cc.Director.PROJECTION_2D);
   updateSize();
   cc.view.setResizeCallback(updateSize);
   cc.view.resizeWithBrowserSize(true);
-  cc.LoaderScene.preload([...Object.values(atlas), pressStart2p], () => {
+  cc.loader.load([...Object.values(atlas), pressStart2p], () => {
     cc.spriteFrameCache.addSpriteFrames(atlas.plist);
     setupPixelPerfectRendering();
     cc.director.runScene(new Scene());

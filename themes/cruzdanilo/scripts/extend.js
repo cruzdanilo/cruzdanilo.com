@@ -21,7 +21,8 @@ function webpack() {
   const options = new WebpackOptionsDefaulter().process({
     context,
     entry: './main.js',
-    mode: 'production',
+    mode: 'development', // DEBUG
+    devtool: 'source-map', // DEBUG
     output: { filename: '[name].js', path: context },
     performance: { maxAssetSize: 600000, maxEntrypointSize: 600000 },
     module: {
