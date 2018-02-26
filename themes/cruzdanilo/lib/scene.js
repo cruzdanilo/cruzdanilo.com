@@ -1,3 +1,4 @@
+/* global articles */
 import cc from 'cocos2d-html5';
 import cave from './assets/cave.png';
 import characters from './assets/characters.png';
@@ -50,6 +51,14 @@ export default class Scene extends cc.Scene {
     text.setAnchorPoint(0.5, 1);
     text.setNormalizedPosition(0.5, 0.9);
     this.addChild(text);
+
+    articles.forEach((a, i) => {
+      const article = new cc.LabelBMFont(a.textContent, pressStart2p);
+      article.setScale(2);
+      article.setAnchorPoint(0.5, 1);
+      article.setNormalizedPosition(0.5, 0.8 - (i * 0.1));
+      this.addChild(article);
+    });
 
     this.layout();
 
