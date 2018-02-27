@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "start": "hexo server",
-    "generate": "hexo generate",
+    "build": "hexo generate",
     "deploy": "hexo deploy",
-    "clean": "hexo clean"
+    "clean": "hexo clean",
+    "lint": "eslint themes/cruzdanilo/lib/"
   },
   "hexo": {
     "version": "3.5.0"
