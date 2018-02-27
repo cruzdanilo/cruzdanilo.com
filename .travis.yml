@@ -1,3 +1,10 @@
 language: node_js
 node_js:
-  - "node"
+  - node
+script:
+  - npm run generate
+deploy:
+  provider: script
+  script: npm run deploy
+  on:
+    branch: master
