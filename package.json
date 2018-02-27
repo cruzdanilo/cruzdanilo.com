@@ -6,7 +6,8 @@
     "start": "hexo server",
     "generate": "hexo generate",
     "deploy": "hexo deploy -g",
-    "clean": "hexo clean"
+    "clean": "hexo clean",
+    "test": "hexo deploy -g"
   },
   "hexo": {
     "version": "3.5.0"
@@ -25,7 +26,7 @@
     "hexo-server": "^0.3.1",
     "memory-fs": "^0.4.1",
     "texture-packer-webpack-plugin": "^0.1.1",
-    "webpack": "^4.0.0-beta.2"
+    "webpack": "^4.0.1"
   },
   "devDependencies": {
     "eslint": "^4.18.1",
