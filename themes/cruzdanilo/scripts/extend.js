@@ -81,7 +81,7 @@ hexo.on('generateBefore', () => {
 });
 
 hexo.extend.helper.register('main', function main() {
-  return `<script>
+  return `  <script>
 const articles = [];
 Array.from(document.getElementsByTagName('article')).forEach((e) => {
   articles.push(e);
@@ -89,7 +89,7 @@ Array.from(document.getElementsByTagName('article')).forEach((e) => {
 });
 const atlas = ${JSON.stringify(texturepacker.output, null, 2)};
   </script>
-  ${this.js('main.js')}`;
+  ${this.js('main.js')}\n`;
 });
 
 hexo.extend.helper.register('cover', function cover(item) {
