@@ -34,3 +34,5 @@ cc.game.run({
     cc.director.runScene(new Scene());
   });
 });
+
+if (module.hot) module.hot.accept('./scene', () => cc.director.runScene(new Scene()));

@@ -27,7 +27,8 @@
     "memory-fs": "^0.4.1",
     "texture-packer-webpack-plugin": "^0.1.1",
     "webpack": "^4.17.2",
-    "webpack-dev-middleware": "^3.2.0"
+    "webpack-dev-middleware": "^3.2.0",
+    "webpack-hot-middleware": "^2.23.1"
   },
   "devDependencies": {
     "eslint": "^5.5.0",
@@ -39,6 +40,9 @@
     "env": {
       "browser": true,
       "node": false
+    },
+    "globals": {
+      "module": false
     }
   }
 }

@@ -5,6 +5,7 @@ const MemoryFS = require('memory-fs');
 const TexturePackerPlugin = require('texture-packer-webpack-plugin');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib/');
 const outputPath = 'assets/';
@@ -42,12 +43,14 @@ function buildCompiler() {
 
 let middleware;
 hexo.extend.filter.register('server_middleware', (app) => {
-  options.entry.push('webpack-hot-middleware/client');
+  options.entry.push('webpack-hot-middleware/client?reload=true');
   options.mode = 'development';
   options.devtool = 'source-map';
+  options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
   middleware = webpackDevMiddleware(compiler, { publicPath: compiler.options.output.publicPath });
   app.use(middleware);
+  app.use(webpackHotMiddleware(compiler, { path: '/__webpack_hmr/' }));
 });
 
 hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
