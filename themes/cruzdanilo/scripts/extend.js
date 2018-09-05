@@ -48,23 +48,31 @@ hexo.extend.filter.register('server_middleware', (app) => {
   options.devtool = 'source-map';
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
-  middleware = webpackDevMiddleware(compiler, { publicPath: compiler.options.output.publicPath });
+  middleware = webpackDevMiddleware(compiler, {
+    publicPath: compiler.options.output.publicPath,
+    logger: hexo.log,
+  });
   app.use(middleware);
-  app.use(webpackHotMiddleware(compiler, { path: '/__webpack_hmr/' }));
+  app.use(webpackHotMiddleware(compiler, {
+    path: '/__webpack_hmr/',
+    log: hexo.log.info.bind(hexo.log),
+  }));
 });
 
-hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
-  function toRoutes(compilation) {
-    return Object.entries(compilation.assets).map(([k, v]) => ({
+hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve, reject) => {
+  function handle(stats) {
+    const { errors } = stats.compilation;
+    if (errors && errors.length) return reject(errors[0]);
+    return resolve(Object.entries(stats.compilation.assets).map(([k, v]) => ({
       path: k,
       data: v.source(),
-    }));
+    })));
   }
   if (middleware) {
-    middleware.waitUntilValid(stats => resolve(toRoutes(stats.compilation)));
+    middleware.waitUntilValid(stats => handle(stats, resolve, reject));
   } else {
     if (!compiler) buildCompiler();
-    compiler.run((err, stats) => resolve(toRoutes(stats.compilation)));
+    compiler.run((err, stats) => (err ? reject(err) : handle(stats)));
   }
 }));
 
