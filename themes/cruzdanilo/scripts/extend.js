@@ -43,7 +43,7 @@ function buildCompiler() {
 
 let middleware;
 hexo.extend.filter.register('server_middleware', (app) => {
-  options.entry.push('webpack-hot-middleware/client?reload=true');
+  options.entry.push('webpack-hot-middleware/client?path=/webpack.hmr&reload=true');
   options.mode = 'development';
   options.devtool = 'source-map';
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
@@ -54,7 +54,7 @@ hexo.extend.filter.register('server_middleware', (app) => {
   });
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler, {
-    path: '/__webpack_hmr/',
+    path: '/webpack.hmr',
     log: hexo.log.info.bind(hexo.log),
   }));
 });
