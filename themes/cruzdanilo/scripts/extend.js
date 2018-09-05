@@ -1,84 +1,69 @@
 /* eslint-env node */
 /* global hexo */
-const {
-  Compiler,
-  NodeEnvironmentPlugin,
-  WebpackOptionsApply,
-  WebpackOptionsDefaulter,
-} = require('webpack');
 const path = require('path');
-const MemoryFileSystem = require('memory-fs');
+const MemoryFS = require('memory-fs');
 const TexturePackerPlugin = require('texture-packer-webpack-plugin');
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
 
-let watching;
-let routes;
-let texturepacker;
-const resolves = [];
-
-function webpack() {
-  const context = path.resolve(__dirname, '../lib/');
-  const outputPath = 'assets/';
-  const options = new WebpackOptionsDefaulter().process({
-    context,
-    entry: './main.js',
-    mode: 'development', // DEBUG
-    devtool: 'source-map', // DEBUG
-    output: { filename: '[name].js', path: context },
-    performance: { maxAssetSize: 600000, maxEntrypointSize: 600000 },
-    module: {
-      rules: [
-        {
-          test: /cocos2d-html5\//,
-          use: {
-            loader: 'cocos2d-loader',
-            options: {
-              modules: ['base4webgl', 'actions', 'render-texture', 'labels'],
-            },
+const context = path.resolve(__dirname, '../lib/');
+const outputPath = 'assets/';
+const texturepacker = new TexturePackerPlugin({ outputPath });
+const options = {
+  context,
+  entry: ['./main.js'],
+  output: { filename: '[name].js', path: context },
+  mode: 'production',
+  performance: { maxAssetSize: 600000, maxEntrypointSize: 600000 },
+  module: {
+    rules: [
+      {
+        test: /cocos2d-html5\//,
+        use: {
+          loader: 'cocos2d-loader',
+          options: {
+            modules: ['base4webgl', 'actions', 'render-texture', 'labels'],
           },
         },
-        { test: /\.png$/, use: TexturePackerPlugin.loader({ outputPath }) },
-        { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
-      ],
-    },
-    node: { fs: 'empty' },
-  });
-  const compiler = new Compiler(context);
-  new NodeEnvironmentPlugin().apply(compiler);
-  compiler.outputFileSystem = new MemoryFileSystem();
-  compiler.options = new WebpackOptionsApply().process(options, compiler);
-  texturepacker = new TexturePackerPlugin({ outputPath });
-  texturepacker.apply(compiler);
-  compiler.hooks.afterEmit.tapAsync('cruzdanilo', (compilation, callback) => {
-    routes = Object.entries(compilation.assets).map(([k, v]) => ({
+      },
+      { test: /\.png$/, use: TexturePackerPlugin.loader({ outputPath }) },
+      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
+    ],
+  },
+  plugins: [texturepacker],
+  node: { fs: 'empty' },
+};
+
+let compiler;
+function buildCompiler() {
+  compiler = webpack(options);
+  compiler.outputFileSystem = new MemoryFS();
+}
+
+let middleware;
+hexo.extend.filter.register('server_middleware', (app) => {
+  options.entry.push('webpack-hot-middleware/client');
+  options.mode = 'development';
+  options.devtool = 'source-map';
+  buildCompiler();
+  middleware = webpackDevMiddleware(compiler, { publicPath: compiler.options.output.publicPath });
+  app.use(middleware);
+});
+
+hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
+  function toRoutes(compilation) {
+    return Object.entries(compilation.assets).map(([k, v]) => ({
       path: k,
       data: v.source(),
     }));
-    resolves.forEach(resolve => resolve(routes));
-    if (resolves.length) {
-      resolves.length = 0;
-      routes = null;
-    } else if (hexo.theme.isWatching()) hexo.theme.emit('processAfter');
-    callback();
-  });
-  watching = compiler.watch(null, (err, stats) => {
-    if (err) throw err;
-    stats.toString({ colors: true }).split('\n').forEach(l => hexo.log.info(`webpack: ${l}`));
-  });
-  hexo.on('exit', () => {
-    if (!hexo.theme.isWatching()) watching.close();
-  });
-}
-
-hexo.extend.generator.register('cruzdanilo', () => {
-  if (watching.running) return new Promise(r => resolves.push(r));
-  const res = routes;
-  routes = null;
-  return res;
-});
-
-hexo.on('generateBefore', () => {
-  if (!watching) webpack();
-});
+  }
+  if (middleware) {
+    middleware.waitUntilValid(stats => resolve(toRoutes(stats.compilation)));
+  } else {
+    if (!compiler) buildCompiler();
+    compiler.run((err, stats) => resolve(toRoutes(stats.compilation)));
+  }
+}));
 
 hexo.extend.helper.register('main', function main() {
   return `  <script>
