@@ -7,8 +7,8 @@ const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
-const context = path.resolve(__dirname, '../lib/');
-const outputPath = 'assets/';
+const context = path.resolve(__dirname, '../lib');
+const outputPath = 'assets';
 const texturepacker = new TexturePackerPlugin({ outputPath });
 const options = {
   context,
@@ -69,7 +69,10 @@ hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve, reject)
     })));
   }
   if (middleware) {
-    middleware.waitUntilValid(stats => handle(stats, resolve, reject));
+    middleware.waitUntilValid((stats) => {
+      hexo.theme.emit('processAfter');
+      handle(stats);
+    });
   } else {
     if (!compiler) buildCompiler();
     compiler.run((err, stats) => (err ? reject(err) : handle(stats)));
