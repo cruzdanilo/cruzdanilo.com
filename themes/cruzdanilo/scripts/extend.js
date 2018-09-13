@@ -12,10 +12,10 @@ const outputPath = 'assets';
 const texturepacker = new TexturePackerPlugin({ outputPath });
 const options = {
   context,
-  entry: ['./main.js'],
+  entry: './main.js',
   output: { filename: '[name].js', path: context },
   mode: 'production',
-  performance: { maxAssetSize: 600000, maxEntrypointSize: 600000 },
+  performance: { maxAssetSize: 1024 * 1024, maxEntrypointSize: 1024 * 1024 },
   module: {
     rules: [
       {
@@ -32,7 +32,14 @@ const options = {
     ],
   },
   plugins: [texturepacker],
-  node: { fs: 'empty' },
+  stats: {
+    all: true,
+    colors: true,
+    assetsSort: 'name',
+    maxModules: Infinity,
+    reasons: false,
+    cached: false,
+  },
 };
 
 let compiler;
@@ -43,14 +50,15 @@ function buildCompiler() {
 
 let middleware;
 hexo.extend.filter.register('server_middleware', (app) => {
-  options.entry.push('webpack-hot-middleware/client?path=/webpack.hmr&reload=true');
   options.mode = 'development';
   options.devtool = 'source-map';
+  options.entry = [options.entry, 'webpack-hot-middleware/client?path=/webpack.hmr&reload=true'];
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
   middleware = webpackDevMiddleware(compiler, {
     publicPath: compiler.options.output.publicPath,
     logger: hexo.log,
+    stats: options.stats,
   });
   app.use(middleware);
   app.use(webpackHotMiddleware(compiler, {
@@ -59,11 +67,9 @@ hexo.extend.filter.register('server_middleware', (app) => {
   }));
 });
 
-hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve, reject) => {
+hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
   function handle(stats) {
-    const { errors } = stats.compilation;
-    if (errors && errors.length) return reject(errors[0]);
-    return resolve(Object.entries(stats.compilation.assets).map(([k, v]) => ({
+    resolve(stats.hasErrors() ? null : Object.entries(stats.compilation.assets).map(([k, v]) => ({
       path: k,
       data: v.source(),
     })));
@@ -75,7 +81,13 @@ hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve, reject)
     });
   } else {
     if (!compiler) buildCompiler();
-    compiler.run((err, stats) => (err ? reject(err) : handle(stats)));
+    compiler.run((err, stats) => {
+      if (err) resolve(null);
+      else {
+        hexo.log.info(`cruzdanilo\n${stats.toString(options.stats)}`);
+        handle(stats);
+      }
+    });
   }
 }));
 
