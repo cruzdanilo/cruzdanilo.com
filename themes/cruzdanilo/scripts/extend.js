@@ -2,8 +2,8 @@
 /* global hexo */
 const path = require('path');
 const MemoryFS = require('memory-fs');
-const TexturePackerPlugin = require('texture-packer-webpack-plugin');
 const webpack = require('webpack');
+const TexturePackerPlugin = require('texture-packer-webpack-plugin');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
@@ -13,7 +13,7 @@ const texturepacker = new TexturePackerPlugin({ outputPath });
 const options = {
   context,
   entry: './main.js',
-  output: { filename: '[name].js', path: context },
+  output: { filename: '[name].[chunkhash:6].js', path: context },
   mode: 'production',
   performance: { maxAssetSize: 1024 * 1024, maxEntrypointSize: 1024 * 1024 },
   module: {
@@ -31,7 +31,9 @@ const options = {
       { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
     ],
   },
-  plugins: [texturepacker],
+  plugins: [
+    texturepacker,
+  ],
   stats: {
     all: true,
     colors: true,
@@ -43,9 +45,16 @@ const options = {
 };
 
 let compiler;
+let scripts;
 function buildCompiler() {
   compiler = webpack(options);
   compiler.outputFileSystem = new MemoryFS();
+  compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
+    scripts = compilation.chunks.reduce((files, chunk) => {
+      files.push(...chunk.files.filter(f => /.js($|\?)/.test(f)));
+      return files;
+    }, []);
+  });
 }
 
 let middleware;
@@ -53,6 +62,7 @@ hexo.extend.filter.register('server_middleware', (app) => {
   options.mode = 'development';
   options.devtool = 'source-map';
   options.entry = [options.entry, 'webpack-hot-middleware/client?path=/webpack.hmr&reload=true'];
+  options.output.filename = '[name].[hash:6].js';
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
   middleware = webpackDevMiddleware(compiler, {
@@ -74,12 +84,8 @@ hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
       data: v.source(),
     })));
   }
-  if (middleware) {
-    middleware.waitUntilValid((stats) => {
-      hexo.theme.emit('processAfter');
-      handle(stats);
-    });
-  } else {
+  if (middleware) middleware.waitUntilValid(stats => handle(stats));
+  else {
     if (!compiler) buildCompiler();
     compiler.run((err, stats) => {
       if (err) resolve(null);
@@ -93,14 +99,12 @@ hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
 
 hexo.extend.helper.register('main', function main() {
   return `  <script>
-const articles = [];
-Array.from(document.getElementsByTagName('article')).forEach((e) => {
-  articles.push(e);
-  e.style.display = 'none';
-});
-const atlas = ${JSON.stringify(texturepacker.output, null, 2)};
+const articles = Array.from(document.getElementsByTagName('article'));
+articles.forEach(el => { el.style.display = 'none'; });
+const atlases = ${JSON.stringify(texturepacker.results)};
   </script>
-  ${this.js('main.js')}\n`;
+  ${this.js(scripts)}
+`;
 });
 
 hexo.extend.helper.register('cover', function cover(item) {
