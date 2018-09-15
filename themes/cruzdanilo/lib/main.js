@@ -1,5 +1,5 @@
 /* global atlases */
-import cc from 'cocos2d-html5';
+import { cc } from 'cocos2d-html5';
 import pressStart2p from './assets/press-start-2p.bdf';
 import Scene from './scene';
 

@@ -24,7 +24,8 @@ const options = {
         use: {
           loader: 'cocos2d-loader',
           options: {
-            modules: ['base4webgl', 'actions', 'render-texture', 'labels'],
+            modules: ['base4webgl', 'actions', 'ccui'],
+            exports: ['cc', 'ccui'],
           },
         },
       },

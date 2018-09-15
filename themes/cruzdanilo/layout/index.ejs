@@ -1,6 +1,4 @@
 <% page.posts.forEach((item) => { -%>
-  <article>
-    <h1><%= item.title %></h1>
-    <h2><%= item.path %></h2>
-  </article>
+  <article><h1><%= item.title %></h1>
+<%- item.content -%></article>
 <% }); -%>

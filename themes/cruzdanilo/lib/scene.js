@@ -1,8 +1,9 @@
 /* global articles */
-import cc from 'cocos2d-html5';
+import { cc, ccui } from 'cocos2d-html5';
 import cave from './assets/cave.png';
 import characters from './assets/characters.png';
 import pressStart2p from './assets/press-start-2p.bdf';
+import Article from './article';
 
 export default class Scene extends cc.Scene {
   constructor() {
@@ -41,24 +42,26 @@ export default class Scene extends cc.Scene {
     this.player.setSpriteFrame(animation.getFrames()[0].getSpriteFrame());
     this.player.runAction(cc.animate(animation).repeatForever());
 
-    this.title = new cc.LabelBMFont('danilo neves cruz', pressStart2p);
-    this.title.setAnchorPoint(0.5, 1);
-    this.title.setNormalizedPosition(0.5, 0.99);
-    this.addChild(this.title);
+    this.ui = new ccui.VBox(cc.size(this.width / 2, this.height / 2));
+    this.addChild(this.ui);
+    this.ui.setScale(2);
 
-    const text = new cc.LabelBMFont(`${this.width} x ${this.height}`, pressStart2p);
-    text.setScale(2);
-    text.setAnchorPoint(0.5, 1);
-    text.setNormalizedPosition(0.5, 0.9);
-    this.addChild(text);
+    const layoutParameter = new ccui.LinearLayoutParameter();
+    layoutParameter.setGravity(ccui.LinearLayoutParameter.CENTER_HORIZONTAL);
+    layoutParameter.setMargin(1, 1, 1, 1);
 
-    articles.forEach((a, i) => {
-      const article = new cc.LabelBMFont(a.textContent, pressStart2p);
-      article.setScale(2);
-      article.setAnchorPoint(0.5, 1);
-      article.setNormalizedPosition(0.5, 0.8 - (i * 0.1));
-      this.addChild(article);
-    });
+    this.title = new ccui.LabelBMFont('danilo neves cruz', pressStart2p);
+    this.title.setLayoutParameter(layoutParameter);
+    this.ui.addChild(this.title);
+
+    const text = new ccui.LabelBMFont(`${this.width} x ${this.height}`, pressStart2p);
+    text.setLayoutParameter(layoutParameter);
+    this.ui.addChild(text);
+
+    this.articles = new ccui.VBox();
+    this.ui.addChild(this.articles);
+    this.articles.getLayoutParameter().setGravity(ccui.LinearLayoutParameter.CENTER_HORIZONTAL);
+    this.loadArticles();
 
     this.layout();
 
@@ -78,8 +81,16 @@ export default class Scene extends cc.Scene {
     this.scheduleUpdate();
   }
 
+  loadArticles() {
+    this.articles.removeAllChildren();
+    articles.forEach((el) => {
+      const article = new Article(el);
+      this.articles.addChild(article);
+    });
+  }
+
   layout() {
-    this.title.setScale(Math.min(4, Math.floor(this.width / this.title.width)));
+    this.title.setScale(Math.min(1, Math.floor(this.width / this.title.width)));
   }
 
   update() {
@@ -89,3 +100,5 @@ export default class Scene extends cc.Scene {
     }
   }
 }
+
+if (module.hot) module.hot.accept('./article', () => cc.director.getRunningScene().loadArticles());
