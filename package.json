@@ -8,6 +8,7 @@
     "deploy": "hexo deploy",
     "clean": "hexo clean",
     "rebuild": "hexo clean && hexo generate",
+    "publish": "hexo clean && hexo generate && hexo deploy",
     "lint": "eslint themes/cruzdanilo/lib"
   },
   "hexo": {
