@@ -10,7 +10,7 @@ const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
-const texturepacker = new TexturePackerPlugin({ outputPath });
+const texturePacker = new TexturePackerPlugin({ outputPath });
 const options = {
   context,
   entry: './main.js',
@@ -34,7 +34,7 @@ const options = {
     ],
   },
   plugins: [
-    texturepacker,
+    texturePacker,
     new GenerateSW({ clientsClaim: true, skipWaiting: true }),
   ],
   stats: {
@@ -53,6 +53,7 @@ function buildCompiler() {
   compiler = webpack(options);
   compiler.outputFileSystem = new MemoryFS();
   compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
+    if (compilation.errors.length) return;
     [mainjs] = compilation.namedChunks.get('main').files;
   });
 }
@@ -60,9 +61,16 @@ function buildCompiler() {
 let middleware;
 hexo.extend.filter.register('server_middleware', (app) => {
   options.mode = 'development';
-  options.devtool = 'source-map';
-  options.entry = [options.entry, 'webpack-hot-middleware/client?path=/webpack.hmr&reload=true'];
+  options.devtool = 'eval-source-map';
   options.output.filename = '[name].[hash:6].js';
+  const hmrEndpoint = '/webpack.hmr';
+  options.module.rules.push({
+    include: path.resolve(context, options.entry),
+    use: {
+      loader: require.resolve('./hmr-loader'),
+      options: { path: hmrEndpoint, reload: true },
+    },
+  });
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
   middleware = webpackDevMiddleware(compiler, {
@@ -71,10 +79,11 @@ hexo.extend.filter.register('server_middleware', (app) => {
     stats: options.stats,
   });
   app.use(middleware);
-  app.use(webpackHotMiddleware(compiler, {
-    path: '/webpack.hmr',
+  const hot = webpackHotMiddleware(compiler, {
+    path: hmrEndpoint,
     log: hexo.log.info.bind(hexo.log),
-  }));
+  });
+  app.use(hot);
 });
 
 hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
@@ -101,7 +110,7 @@ hexo.extend.helper.register('main', function main() {
   return `  <script>
 const articles = Array.from(document.getElementsByTagName('article'));
 articles.forEach(el => { el.style.display = 'none'; });
-const atlases = ${JSON.stringify(texturepacker.results)};
+const atlases = ${JSON.stringify(texturePacker.results)};
   </script>
   <script async defer src="${this.url_for(mainjs)}"></script>
 `;
