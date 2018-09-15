@@ -4,6 +4,7 @@ const path = require('path');
 const MemoryFS = require('memory-fs');
 const webpack = require('webpack');
 const TexturePackerPlugin = require('texture-packer-webpack-plugin');
+const { GenerateSW } = require('workbox-webpack-plugin');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
@@ -33,6 +34,7 @@ const options = {
   },
   plugins: [
     texturepacker,
+    new GenerateSW({ clientsClaim: true, skipWaiting: true }),
   ],
   stats: {
     all: true,

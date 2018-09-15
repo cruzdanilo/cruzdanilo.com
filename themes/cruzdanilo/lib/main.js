@@ -20,6 +20,7 @@ function setupPixelPerfectRendering() {
   /* eslint-enable no-underscore-dangle */
 }
 
+if (navigator.serviceWorker) navigator.serviceWorker.register('/service-worker.js');
 cc.game.run({
   id: 'body',
   debugMode: 1, // DEBUG
