@@ -47,15 +47,12 @@ const options = {
 };
 
 let compiler;
-let scripts;
+let mainjs;
 function buildCompiler() {
   compiler = webpack(options);
   compiler.outputFileSystem = new MemoryFS();
   compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
-    scripts = compilation.chunks.reduce((files, chunk) => {
-      files.push(...chunk.files.filter(f => /.js($|\?)/.test(f)));
-      return files;
-    }, []);
+    [mainjs] = compilation.namedChunks.get('main').files;
   });
 }
 
@@ -105,7 +102,7 @@ const articles = Array.from(document.getElementsByTagName('article'));
 articles.forEach(el => { el.style.display = 'none'; });
 const atlases = ${JSON.stringify(texturepacker.results)};
   </script>
-  ${this.js(scripts)}
+  <script async defer src="${this.url_for(mainjs)}"></script>
 `;
 });
 
