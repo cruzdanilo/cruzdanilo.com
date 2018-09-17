@@ -5,10 +5,9 @@
   "scripts": {
     "start": "hexo server",
     "build": "hexo generate",
-    "deploy": "hexo deploy",
-    "clean": "hexo clean",
     "rebuild": "hexo generate --force",
-    "publish": "hexo clean && hexo generate && hexo deploy",
+    "deploy": "hexo generate --force --deploy",
+    "clean": "hexo clean",
     "lint": "eslint themes/cruzdanilo/lib"
   },
   "hexo": {
