@@ -44,6 +44,7 @@ const options = {
     cached: false,
   },
 };
+const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 
 let compiler;
 let mainjs;
@@ -63,7 +64,7 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
   const charset = [...locals.posts.reduce((set, post) => {
     Array.from(post.title + stripHTML(post.content)).forEach(c => set.add(c));
     return set;
-  }, new Set())].filter(ch => /[ \S]/.test(ch)).sort().join('');
+  }, new Set(baseCharset))].filter(ch => /[ \S]/.test(ch)).sort().join('');
   compiler.options.module.rules
     .filter(r => r.use.loader === 'bdf2fnt-loader')
     .forEach(r => Object.assign(r.use.options, { charset }));
