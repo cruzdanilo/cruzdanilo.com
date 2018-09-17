@@ -42,9 +42,8 @@ export default class Scene extends cc.Scene {
     this.player.setSpriteFrame(animation.getFrames()[0].getSpriteFrame());
     this.player.runAction(cc.animate(animation).repeatForever());
 
-    this.ui = new ccui.VBox(cc.size(this.width / 2, this.height / 2));
+    this.ui = new ccui.VBox();
     this.addChild(this.ui);
-    this.ui.setScale(2);
 
     const layoutParameter = new ccui.LinearLayoutParameter();
     layoutParameter.setGravity(ccui.LinearLayoutParameter.CENTER_HORIZONTAL);
@@ -90,7 +89,9 @@ export default class Scene extends cc.Scene {
   }
 
   layout() {
-    this.title.setScale(Math.min(1, Math.floor(this.width / this.title.width)));
+    const scale = Math.min(2, Math.floor(this.width / 300));
+    this.ui.setScale(scale);
+    this.ui.setContentSize(this.width / scale, this.height / scale);
   }
 
   update() {
