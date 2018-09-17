@@ -7,7 +7,7 @@
     "build": "hexo generate",
     "deploy": "hexo deploy",
     "clean": "hexo clean",
-    "rebuild": "hexo clean && hexo generate",
+    "rebuild": "hexo generate --force",
     "publish": "hexo clean && hexo generate && hexo deploy",
     "lint": "eslint themes/cruzdanilo/lib"
   },
