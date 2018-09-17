@@ -4,3 +4,15 @@ node_js:
 script:
   - npm run lint
   - npm run build
+after_success:
+  - >-
+    openssl aes-256-cbc
+    -K $encrypted_01247138302d_key
+    -iv $encrypted_01247138302d_iv
+    -in deploy-key.enc
+    -out deploy-key
+    -d
+  - chmod 600 deploy-key
+  - eval "$(ssh-agent -s)"
+  - ssh-add deploy-key
+  - npm run deploy

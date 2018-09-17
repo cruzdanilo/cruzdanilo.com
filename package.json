@@ -6,7 +6,7 @@
     "start": "hexo server",
     "build": "hexo generate",
     "rebuild": "hexo generate --force",
-    "deploy": "hexo generate --force --deploy",
+    "deploy": "hexo deploy",
     "clean": "hexo clean",
     "lint": "eslint themes/cruzdanilo/lib"
   },
