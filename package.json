@@ -26,6 +26,7 @@
     "hexo-renderer-ejs": "^0.3.1",
     "hexo-renderer-marked": "^0.3.2",
     "hexo-server": "^0.3.3",
+    "hexo-util": "^0.6.3",
     "memory-fs": "^0.4.1",
     "texture-packer-webpack-plugin": "^0.2.0",
     "webpack": "^4.19.0",

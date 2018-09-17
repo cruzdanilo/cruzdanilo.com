@@ -3,8 +3,9 @@
 const path = require('path');
 const MemoryFS = require('memory-fs');
 const webpack = require('webpack');
-const TexturePackerPlugin = require('texture-packer-webpack-plugin');
+const { HashStream } = require('hexo-util');
 const { GenerateSW } = require('workbox-webpack-plugin');
+const TexturePackerPlugin = require('texture-packer-webpack-plugin');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
@@ -58,11 +59,11 @@ function buildCompiler() {
   });
 }
 
-let middleware;
+let dev;
 hexo.extend.filter.register('server_middleware', (app) => {
   options.mode = 'development';
   options.devtool = 'eval-source-map';
-  options.output.filename = '[name].[hash:6].js';
+  options.output.filename = '[name].js';
   const hmrEndpoint = '/webpack.hmr';
   options.module.rules.push({
     include: path.resolve(context, options.entry),
@@ -73,27 +74,45 @@ hexo.extend.filter.register('server_middleware', (app) => {
   });
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
-  middleware = webpackDevMiddleware(compiler, {
+  dev = webpackDevMiddleware(compiler, {
     publicPath: compiler.options.output.publicPath,
     logger: hexo.log,
     stats: options.stats,
   });
-  app.use(middleware);
+  app.use(dev);
   const hot = webpackHotMiddleware(compiler, {
     path: hmrEndpoint,
     log: hexo.log.info.bind(hexo.log),
   });
   app.use(hot);
+  const hashes = new Map();
+  hexo.on('generateAfter', async () => {
+    const reload = (await Promise.all(hexo.route.list().map(async (routePath) => {
+      if (dev.context.webpackStats.compilation.assets[routePath]) return false;
+      const route = hexo.route.get(routePath);
+      if (!route.modified) return false;
+      const hash = await new Promise((resolve, reject) => {
+        const stream = new HashStream();
+        route.pipe(stream)
+          .on('error', reject)
+          .on('finish', () => resolve(stream.read().toString('hex')));
+      });
+      const lastHash = hashes.get(routePath);
+      hashes.set(routePath, hash);
+      return !!lastHash && lastHash !== hash;
+    }))).find(Boolean);
+    if (reload) hot.publish({ action: 'reload' });
+  });
 });
 
 hexo.extend.generator.register('cruzdanilo', () => new Promise((resolve) => {
   function handle(stats) {
     resolve(stats.hasErrors() ? null : Object.entries(stats.compilation.assets).map(([k, v]) => ({
       path: k,
-      data: v.source(),
+      data: { data: v.source(), modified: v.emitted },
     })));
   }
-  if (middleware) middleware.waitUntilValid(stats => handle(stats));
+  if (dev) dev.waitUntilValid(stats => handle(stats));
   else {
     if (!compiler) buildCompiler();
     compiler.run((err, stats) => {
