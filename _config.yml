@@ -10,7 +10,7 @@ language:
 timezone:
 
 # URL
-url: http://cruzdanilo.com
+url: https://cruzdanilo.com
 root: /
 permalink: :title/
 permalink_defaults:
