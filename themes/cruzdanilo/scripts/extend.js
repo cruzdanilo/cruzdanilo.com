@@ -70,12 +70,12 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
     .forEach(r => Object.assign(r.use.options, { charset }));
 
   async function cruzdanilo(stats) {
-    resolve(stats.hasErrors() ? null : await Promise.all(Object.entries(stats.compilation.assets)
-      .map(([k, v]) => new Promise((resolveFile) => {
+    resolve(stats.hasErrors() ? null : await Promise.all(Object.keys(stats.compilation.assets)
+      .map(k => new Promise((resolveFile) => {
         const absPath = path.join(compiler.outputPath, k);
         compiler.outputFileSystem.readFile(absPath, (err, data) => resolveFile({
           path: k,
-          data: { data: err ? null : data, modified: v.emitted },
+          data: err ? null : data,
         }));
       }))));
   }
