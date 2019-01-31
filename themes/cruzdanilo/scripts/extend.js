@@ -69,23 +69,28 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
     .filter(r => r.use.loader === 'bdf2fnt-loader')
     .forEach(r => Object.assign(r.use.options, { charset }));
 
-  function cruzdanilo(stats) {
-    resolve(stats.hasErrors() ? null : Object.entries(stats.compilation.assets).map(([k, v]) => ({
-      path: k,
-      data: { data: v.source(), modified: v.emitted },
-    })));
+  async function cruzdanilo(stats) {
+    resolve(stats.hasErrors() ? null : await Promise.all(Object.entries(stats.compilation.assets)
+      .map(([k, v]) => new Promise((resolveFile) => {
+        const absPath = path.join(compiler.outputPath, k);
+        compiler.outputFileSystem.readFile(absPath, (err, data) => resolveFile({
+          path: k,
+          data: { data: err ? null : data, modified: v.emitted },
+        }));
+      }))));
   }
+
   if (dev) {
     if (charset !== dev.charset) {
       dev.charset = charset;
       dev.invalidate(cruzdanilo);
     } else dev.waitUntilValid(cruzdanilo);
   } else {
-    compiler.run((err, stats) => {
+    compiler.run(async (err, stats) => {
       if (err) resolve(null);
       else {
         hexo.log.info(`cruzdanilo\n${stats.toString(options.stats)}`);
-        cruzdanilo(stats);
+        await cruzdanilo(stats);
       }
     });
   }
