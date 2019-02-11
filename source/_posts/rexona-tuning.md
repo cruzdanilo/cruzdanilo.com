@@ -1,6 +1,7 @@
 ---
 title: rexona tuning
-date: 2018-09-28 15:29:27
+subtitle: 3d racing game
+date: 2009-10-05 00:00:00
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, rexona]
 cover_index: rexona-tuning/photo07.jpg

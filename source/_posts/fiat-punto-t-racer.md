@@ -1,6 +1,7 @@
 ---
 title: fiat punto t-racer
-date: 2018-09-28 15:26:26
+subtitle: 3d racing game
+date: 2009-03-19 00:00:00
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, fiat]
 cover_index: fiat-punto-t-racer/photo00.jpg
