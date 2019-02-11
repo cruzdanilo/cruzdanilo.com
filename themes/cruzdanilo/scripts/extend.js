@@ -4,36 +4,31 @@ const path = require('path');
 const MemoryFS = require('memory-fs');
 const webpack = require('webpack');
 const { HashStream, stripHTML } = require('hexo-util');
-const { GenerateSW } = require('workbox-webpack-plugin');
-const TexturePackerPlugin = require('texture-packer-webpack-plugin');
+// const { GenerateSW } = require('workbox-webpack-plugin');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
-const texturePacker = new TexturePackerPlugin({ outputPath });
 const options = {
   context,
   entry: './main.js',
   output: { filename: '[name].[chunkhash:6].js', path: context },
   mode: 'production',
-  performance: { maxAssetSize: 1024 * 1024, maxEntrypointSize: 1024 * 1024 },
+  performance: { maxAssetSize: 2 * 1024 * 1024, maxEntrypointSize: 2 * 1024 * 1024 },
   module: {
     rules: [
-      {
-        test: /cocos2d-html5\//,
-        use: {
-          loader: 'cocos2d-loader',
-          options: { modules: ['base4webgl', 'actions', 'ccui'], exports: ['cc', 'ccui'] },
-        },
-      },
+      { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' },
       { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
-      { test: /\.png$/, use: TexturePackerPlugin.loader({ outputPath }) },
+      { test: /\.png$/, use: 'file-loader' },
     ],
   },
   plugins: [
-    texturePacker,
-    new GenerateSW({ clientsClaim: true, skipWaiting: true }),
+    // new GenerateSW({ clientsClaim: true, skipWaiting: true }),
+    new webpack.DefinePlugin({
+      CANVAS_RENDERER: JSON.stringify(true),
+      WEBGL_RENDERER: JSON.stringify(true),
+    }),
   ],
   stats: {
     all: true,
@@ -42,6 +37,7 @@ const options = {
     maxModules: Infinity,
     reasons: false,
     cached: false,
+    optimizationBailout: false,
   },
 };
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
@@ -100,7 +96,6 @@ hexo.extend.helper.register('main', function main() {
   return `  <script>
 const articles = Array.from(document.getElementsByTagName('article'));
 articles.forEach(el => { el.style.display = 'none'; });
-const atlases = ${JSON.stringify(texturePacker.results)};
   </script>
   <script async defer src="${this.url_for(mainjs)}"></script>
 `;
