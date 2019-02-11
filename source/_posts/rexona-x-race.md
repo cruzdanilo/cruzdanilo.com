@@ -3,6 +3,7 @@ title: rexona x-race
 date: 2018-09-28 15:24:53
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, rexona]
+cover_index: rexona-x-race/photo04.jpg
 photos:
   - rexona-x-race/photo00.jpg
   - rexona-x-race/photo01.jpg

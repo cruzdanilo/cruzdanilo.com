@@ -3,6 +3,7 @@ title: peugeot 207 racer
 date: 2018-02-10 17:23:25
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, peugeot]
+cover_index: peugeot-207-racer/photo00.jpg
 photos:
   - peugeot-207-racer/photo00.jpg
   - peugeot-207-racer/photo01.jpg

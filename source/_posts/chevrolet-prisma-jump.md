@@ -3,6 +3,7 @@ title: chevrolet prisma jump
 date: 2018-02-08 19:18:39
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, chevrolet]
+cover_index: chevrolet-prisma-jump/photo00.jpg
 photos:
   - chevrolet-prisma-jump/photo00.jpg
   - chevrolet-prisma-jump/photo01.jpg

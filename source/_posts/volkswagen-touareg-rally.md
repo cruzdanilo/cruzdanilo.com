@@ -3,6 +3,7 @@ title: volkswagen touareg rally
 date: 2018-09-28 15:23:56
 categories: games
 tags: [game, 3d, racing, unity, web, c sharp, volkswagen]
+cover_index: volkswagen-touareg-rally/photo05.jpg
 photos:
   - volkswagen-touareg-rally/photo00.png
   - volkswagen-touareg-rally/photo01.jpg
