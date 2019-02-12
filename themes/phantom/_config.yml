@@ -3,7 +3,7 @@ menu:
   home: /
 
 # Logo Image Source
-logo_src: /images/logo.svg
+logo_src: /favicon.ico
 
 # Theme Main Subtitle
 subtitle_main: game developer portfolio
