@@ -37,7 +37,7 @@ comments:
     comment_colorscheme: light
 
 # Google Analytics Tracking ID
-google_analytics:
+google_analytics: UA-9559592-1
 
 # Social Accounts
 github_url: https://github.com/cruzdanilo
