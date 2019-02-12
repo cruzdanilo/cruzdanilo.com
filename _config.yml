@@ -68,5 +68,5 @@ theme: phantom
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:cruzdanilo/cruzdanilo.github.io.git
+  repo: git@github.com:cruzdanilo/cruzdanilo.com.git
   branch: master
