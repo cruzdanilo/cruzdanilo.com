@@ -26,7 +26,7 @@
     <% } %>
 
     <!--Open Graph Site Name-->
-    <meta property="og:site_name" content="<%= config.title %>"/>
+    <meta property="og:site_name" content="<%= config.title + ' - ' + config.subtitle %>"/>
 
     <!--Page Cover-->
     <% if(page.cover) { %>
@@ -46,7 +46,7 @@
             if (page.year) title.push(__('archive_b', page.year + (page.month ? '/' + page.month : '')));
             else title.push(__('archive_a'));
         }
-        title.push(config.title);
+        title.push(config.title + ' - ' + config.subtitle);
     %>
     <title><%= title.join(' - ') %></title>
 
