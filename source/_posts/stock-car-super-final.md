@@ -3,7 +3,7 @@ title: stock car super final
 subtitle: 3d racing game
 date: 2013-01-01 00:00:00
 categories: games
-tags: [game, 3d, racing, unity, web, c sharp, rede globo]
+tags: [game, advergame, 3d, racing, unity, web, c sharp, rede globo]
 cover_index: stock-car-super-final/photo00.png
 photos:
   - stock-car-super-final/photo00.png

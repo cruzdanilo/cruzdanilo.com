@@ -3,7 +3,7 @@ title: rexona x-race
 subtitle: 3d racing game
 date: 2009-06-22 00:00:00
 categories: games
-tags: [game, 3d, racing, unity, web, c sharp, rexona]
+tags: [game, advergame, 3d, racing, unity, web, c sharp, rexona]
 cover_index: rexona-x-race/photo04.jpg
 photos:
   - rexona-x-race/photo00.jpg

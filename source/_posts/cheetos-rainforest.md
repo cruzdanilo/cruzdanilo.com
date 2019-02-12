@@ -3,7 +3,7 @@ title: cheetos rainforest
 subtitle: 3d platformer game
 date: 2011-01-01 00:00:00
 categories: games
-tags: [game, 3d, platformer, unity, web, c sharp, cheetos]
+tags: [game, advergame, 3d, platformer, unity, web, c sharp, cheetos]
 cover_index: cheetos-rainforest/photo00.jpg
 photos:
   - cheetos-rainforest/photo00.jpg
