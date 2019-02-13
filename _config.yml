@@ -65,8 +65,17 @@ pagination_dir: page
 theme: phantom
 
 # Deployment
-## Docs: https://hexo.io/docs/deployment.html
+## https://hexo.io/docs/deployment.html
 deploy:
   type: git
   repo: git@github.com:cruzdanilo/cruzdanilo.com.git
   branch: master
+
+# Image optimization
+## https://github.com/hexojs/hexo-filter-responsive-images
+responsive_images:
+  pattern: '**/*.+(png|jpg|jpeg)'
+  sizes:
+    cover:
+      width: 450
+      height: 450

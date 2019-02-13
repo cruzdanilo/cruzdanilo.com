@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2008-08-19 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, peugeot]
-cover_index: peugeot-207-racer/photo00.jpg
+cover_index: peugeot-207-racer/cover_photo00.jpg
 photos:
   - peugeot-207-racer/photo00.jpg
   - peugeot-207-racer/photo01.jpg

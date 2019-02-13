@@ -4,7 +4,7 @@ subtitle: 3d first person shooter game
 date: 2010-05-01 00:00:00
 categories: games
 tags: [game, advergame, 3d, fps, unity, web, c sharp, rexona]
-cover_index: rexona-footzombie/photo00.jpg
+cover_index: rexona-footzombie/cover_photo00.jpg
 photos:
   - rexona-footzombie/photo00.jpg
   - rexona-footzombie/photo07.jpg

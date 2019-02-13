@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2008-06-23 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, volkswagen]
-cover_index: volkswagen-touareg-rally/photo02.jpg
+cover_index: volkswagen-touareg-rally/cover_photo02.jpg
 photos:
   - volkswagen-touareg-rally/photo00.png
   - volkswagen-touareg-rally/photo01.jpg

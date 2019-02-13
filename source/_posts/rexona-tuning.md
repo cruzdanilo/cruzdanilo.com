@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2009-10-05 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, rexona]
-cover_index: rexona-tuning/photo07.jpg
+cover_index: rexona-tuning/cover_photo07.jpg
 photos:
   - rexona-tuning/photo00.jpg
   - rexona-tuning/photo01.jpg

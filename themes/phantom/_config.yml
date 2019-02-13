@@ -1,7 +1,7 @@
 # Header
 menu:
   home: /
-  contact: "#contact"
+  contact: '#contact'
 
 # Logo Image Source
 logo_src: /favicon.ico

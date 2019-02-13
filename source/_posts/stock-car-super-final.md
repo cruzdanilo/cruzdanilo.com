@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2013-01-01 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, rede globo]
-cover_index: stock-car-super-final/photo00.png
+cover_index: stock-car-super-final/cover_photo12.jpg
 photos:
   - stock-car-super-final/photo00.png
   - stock-car-super-final/photo01.jpg

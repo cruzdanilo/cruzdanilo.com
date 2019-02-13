@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2009-03-19 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, fiat, rede globo]
-cover_index: fiat-punto-t-racer/photo00.jpg
+cover_index: fiat-punto-t-racer/cover_photo09.jpg
 photos:
   - fiat-punto-t-racer/photo00.jpg
   - fiat-punto-t-racer/photo01.jpg
