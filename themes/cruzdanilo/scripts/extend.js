@@ -13,14 +13,14 @@ const outputPath = 'assets';
 const options = {
   context,
   entry: './main.js',
-  output: { filename: '[name].[chunkhash:6].js', path: context },
+  output: { filename: '[name].[chunkhash:8].js', path: context },
   mode: 'production',
   performance: { maxAssetSize: 2 * 1024 * 1024, maxEntrypointSize: 2 * 1024 * 1024 },
   module: {
     rules: [
       { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' },
       { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
-      { test: /\.png$/, use: 'file-loader' },
+      { test: /\.png$/, use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]' } } },
     ],
   },
   plugins: [
