@@ -13,7 +13,7 @@
 
 		@include vendor('display', 'flex');
 		@include vendor('flex-wrap', 'wrap');
-		postiion: relative;
+		position: relative;
 		margin: ($gutter * -1) 0 0 ($gutter * -1);
 
 		article {
@@ -30,12 +30,15 @@
 				position: relative;
 				display: block;
 				width: 100%;
+				height: 100%;
 				border-radius: _size(border-radius);
 				overflow: hidden;
 
 				img {
 					display: block;
 					width: 100%;
+					height: 100%;
+					object-fit: cover;
 				}
 
 				&:before {

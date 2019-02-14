@@ -1,8 +1,10 @@
 ---
 title: doritos lovers
-date: 2018-09-28 15:28:00
+subtitle: 3d web site/widget
+date: 2009-04-01 00:00:00
 categories: augmented reality
-tags: [augmented reality, 3d, web, orkut, flash, papervision3d, actionscript, doritos]
+tags: [augmented reality, 3d, web, social network, flash, papervision3d, actionscript, doritos]
+cover_index: doritos-lovers/cover_photo07.png
 photos:
   - doritos-lovers/photo00.jpg
   - doritos-lovers/photo01.jpg

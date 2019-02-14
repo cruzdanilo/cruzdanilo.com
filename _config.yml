@@ -4,7 +4,7 @@
 # Site
 title: danilo neves cruz
 subtitle: game developer
-description: my portfolio
+description: i'm a computer scientist and i've been developing games and interactive digital content for more than 10 years. this is my portfolio.
 author: danilo neves cruz
 language:
 timezone:
@@ -44,7 +44,7 @@ highlight:
 # Home page setting
 index_generator:
   path: ''
-  per_page: 10
+  per_page: 20
   order_by: -date
 
 # Category & Tag
@@ -58,15 +58,24 @@ date_format: YYYY-MM-DD
 time_format: HH:mm:ss
 
 # Pagination
-per_page: 10
+per_page: 20
 pagination_dir: page
 
 # Extensions
 theme: cruzdanilo
 
 # Deployment
-## Docs: https://hexo.io/docs/deployment.html
+## https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:cruzdanilo/cruzdanilo.github.io.git
+  repo: git@github.com:cruzdanilo/cruzdanilo.com.git
   branch: master
+
+# Image optimization
+## https://github.com/hexojs/hexo-filter-responsive-images
+responsive_images:
+  pattern: '**/*.+(png|jpg|jpeg)'
+  sizes:
+    cover:
+      width: 450
+      height: 450
