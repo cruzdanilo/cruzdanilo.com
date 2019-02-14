@@ -74,7 +74,7 @@ deploy:
 # Image optimization
 ## https://github.com/hexojs/hexo-filter-responsive-images
 responsive_images:
-  pattern: '**/*.+(png|jpg|jpeg)'
+  pattern: '*/*.+(png|jpg|jpeg)'
   sizes:
     cover:
       width: 450
