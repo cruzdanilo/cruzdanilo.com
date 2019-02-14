@@ -1,4 +1,7 @@
 <% page.posts.forEach((item) => { -%>
-  <article><h1><%= item.title %></h1>
-<%- item.content -%></article>
+  <article>
+<img src="<%= item.cover_index %>"/>
+<h1><%= item.title %></h1>
+<%- item.content -%>  </article>
 <% }); -%>
+<%- main() -%>
