@@ -95,7 +95,8 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
 hexo.extend.helper.register('main', function main() {
   return `  <script>
 const articles = Array.from(document.getElementsByTagName('article'));
-articles.forEach(el => { el.style.display = 'none'; });
+const length = articles.length;
+for (let i = 0; i < length; i++) articles[i].style.display = 'none';
   </script>
   <script async defer src="${this.url_for(mainjs)}"></script>
 `;
