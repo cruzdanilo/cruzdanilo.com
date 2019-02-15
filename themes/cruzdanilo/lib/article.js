@@ -23,8 +23,8 @@ export function createArticle(scene, node, i) {
   }
   const image = scene.add.image(11 * 3, 11 * 3, `article-${i}`).setOrigin(0);
   const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0).setScale(3)
-    .play('article-frame-idle')
-    .setInteractive()
+    .play('article-frame-idle');
+  image.setInteractive()
     .on('pointerdown', () => {})
     .on('pointerover', () => sprite
       .play('article-frame-open', false, sprite.anims.currentFrame.index))
