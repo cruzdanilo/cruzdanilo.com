@@ -27,9 +27,9 @@ export default class Scene extends Phaser.Scene {
     this.cache.tilemap.add('tilemap', { format: Phaser.Tilemaps.Formats.TILED_JSON, data: tilemap });
     const map = this.add.tilemap('tilemap');
     map.addTilesetImage('tileset', 'tileset');
-    this.map = map.createStaticLayer('main', 'tileset').setScale(3);
+    this.map = map.createStaticLayer('main', 'tileset').setScale(2);
     this.articles = articles.map((a, i) => createArticle(this, a, i)
-      .setPosition((48 + (i % 4) * (48 + 16)) * 3, Math.floor(i / 4) * (64 + 16) * 3));
+      .setPosition((48 + (i % 4) * (48 + 16)) * 2, Math.floor(i / 4) * (64 + 16) * 2));
     const camera = this.cameras.main;
     const cursors = this.input.keyboard.createCursorKeys();
     this.controls = new Phaser.Cameras.Controls.FixedKeyControl({

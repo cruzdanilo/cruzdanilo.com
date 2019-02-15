@@ -21,8 +21,8 @@ export function createArticle(scene, node, i) {
       frameRate: 10,
     });
   }
-  const image = scene.add.image(11 * 3, 11 * 3, `article-${i}`).setOrigin(0);
-  const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0).setScale(3)
+  const image = scene.add.image(11 * 2, 11 * 2, `article-${i}`).setOrigin(0);
+  const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0).setScale(2)
     .play('article-frame-idle');
   image.setInteractive()
     .on('pointerdown', () => {})

@@ -77,5 +77,5 @@ responsive_images:
   pattern: '*/*.+(png|jpg|jpeg)'
   sizes:
     cover:
-      width: 81 #27
-      height: 123 #41
+      width: 54 # 27
+      height: 82 # 41
