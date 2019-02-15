@@ -1,9 +1,6 @@
 import 'phaser';
 import Scene from './scene';
 
-document.body.style.margin = 0;
-document.body.style.overflow = 'hidden';
-
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   width: 400,

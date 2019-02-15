@@ -93,13 +93,8 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
 }));
 
 hexo.extend.helper.register('main', function main() {
-  return `  <script>
-const articles = Array.from(document.getElementsByTagName('article'));
-const length = articles.length;
-for (let i = 0; i < length; i++) articles[i].style.display = 'none';
-  </script>
-  <script async defer src="${this.url_for(mainjs)}"></script>
-`;
+  return `<script>document.body.className = 'game';</script>
+<script async defer src="${this.url_for(mainjs)}"></script>`;
 });
 
 hexo.extend.helper.register('cover', function cover(item) {

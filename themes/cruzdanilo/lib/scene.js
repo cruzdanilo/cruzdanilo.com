@@ -4,6 +4,8 @@ import tilemap from './assets/tilemap';
 import tileset from './assets/tileset.png';
 import { preloadArticles, createArticle, cleanupArticles } from './article';
 
+const articles = [...document.getElementsByTagName('article')];
+
 export default class Scene extends Phaser.Scene {
   constructor() {
     super(Scene.KEY);
