@@ -11,9 +11,10 @@ export function createArticle(scene, node, i) {
     scene.anims.create({
       key: 'article-frame-idle',
       frames: scene.anims.generateFrameNumbers('article-frame', { start: 0, end: 1 }),
-      frameRate: 1,
+      frameRate: 5,
       yoyo: true,
       repeat: -1,
+      repeatDelay: 1000,
     });
     scene.anims.create({
       key: 'article-frame-open',
