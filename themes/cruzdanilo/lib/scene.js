@@ -27,20 +27,30 @@ export default class Scene extends Phaser.Scene {
     this.cache.tilemap.add('tilemap', { format: Phaser.Tilemaps.Formats.TILED_JSON, data: tilemap });
     const map = this.add.tilemap('tilemap');
     map.addTilesetImage('tileset', 'tileset');
-    this.map = map.createStaticLayer('main', 'tileset').setScale(2);
-    this.articles = articles.map((a, i) => createArticle(this, a, i)
-      .setPosition((48 + (i % 4) * (48 + 16)) * 2, Math.floor(i / 4) * (64 + 16) * 2));
-    const camera = this.cameras.main;
+    this.map = map.createStaticLayer('main', 'tileset');
+    this.articles = articles.map((a, i) => createArticle(this, a, i));
     const cursors = this.input.keyboard.createCursorKeys();
     this.controls = new Phaser.Cameras.Controls.FixedKeyControl({
-      camera,
+      camera: this.cameras.main,
       left: cursors.left,
       right: cursors.right,
       up: cursors.up,
       down: cursors.down,
       speed: 0.2,
     });
-    camera.setBounds(0, 0, this.map.displayWidth, this.map.displayHeight);
+    this.scale.on('resize', this.layout, this);
+    this.layout();
+  }
+
+  layout(size = this.scale.gameSize) {
+    const { width } = size;
+    const scale = 2;
+    this.map.setScale(scale);
+    this.articles.forEach((article, i) => {
+      article.setPosition((48 + (i % 4) * (48 + 16)) * scale, Math.floor(i / 4) * (64 + 16) * scale);
+      article.layout(scale);
+    });
+    this.cameras.main.setBounds(0, 0, this.map.displayWidth, this.map.displayHeight);
   }
 
   update(time, delta) {

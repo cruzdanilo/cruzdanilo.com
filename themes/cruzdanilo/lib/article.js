@@ -23,7 +23,7 @@ export function createArticle(scene, node, i) {
     });
   }
   const image = scene.add.image(11 * 2, 11 * 2, `article-${i}`).setOrigin(0);
-  const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0).setScale(2)
+  const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0)
     .play('article-frame-idle');
   image.setInteractive()
     .on('pointerdown', () => {})
@@ -32,7 +32,11 @@ export function createArticle(scene, node, i) {
     .on('pointerout', () => sprite
       .anims.playReverse('article-frame-open', false, sprite.anims.currentFrame.index)
       .anims.chain('article-frame-idle'));
-  return scene.add.container().add([image, sprite]);
+  const container = scene.add.container().add([image, sprite]);
+  container.layout = (scale) => {
+    sprite.setScale(scale);
+  };
+  return container;
 }
 
 export function cleanupArticles(scene) {
