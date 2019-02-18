@@ -1,4 +1,3 @@
-/* global articles */
 import 'phaser';
 import tilemap from './assets/tilemap';
 import tileset from './assets/tileset.png';
@@ -47,8 +46,11 @@ export default class Scene extends Phaser.Scene {
     const scale = 2;
     this.map.setScale(scale);
     this.articles.forEach((article, i) => {
-      article.setPosition((48 + (i % 4) * (48 + 16)) * scale, Math.floor(i / 4) * (64 + 16) * scale);
       article.layout(scale);
+      article.setPosition(
+        (48 + (i % 4) * (48 + 16)) * scale,
+        Math.floor(i / 4) * (64 + 16) * scale,
+      );
     });
     this.cameras.main.setBounds(0, 0, this.map.displayWidth, this.map.displayHeight);
   }
