@@ -1,4 +1,5 @@
 import 'phaser';
+import { Plugin as NineSlicePlugin } from 'phaser3-nineslice';
 import Scene from './scene';
 
 const game = new Phaser.Game({
@@ -6,10 +7,8 @@ const game = new Phaser.Game({
   width: 400,
   height: 224,
   pixelArt: true,
-  scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoRound: true,
-  },
+  scale: { mode: Phaser.Scale.RESIZE, autoRound: true },
+  plugins: { global: [NineSlicePlugin.DefaultCfg] },
   scene: Scene,
 });
 

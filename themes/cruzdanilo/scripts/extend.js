@@ -9,7 +9,6 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib');
-const outputPath = 'assets';
 const options = {
   context,
   entry: './main.js',
@@ -19,7 +18,7 @@ const options = {
   module: {
     rules: [
       { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' },
-      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
+      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: {} } },
       { test: /\.png$/, use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]' } } },
     ],
   },
