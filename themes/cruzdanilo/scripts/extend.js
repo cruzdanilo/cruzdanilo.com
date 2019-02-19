@@ -23,7 +23,7 @@ const options = {
       {
         test: /\.png$/,
         oneOf: [
-          { test: /eighties/, use: { loader: 'png2fnt-loader', options: { chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:?!-_~#"\'&()[]|`/\\@°+=*%€$£¢<>©®' } } },
+          { test: /eighties/, use: { loader: 'png2fnt-loader', options: { ignoreColumns: [284], chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:?!-_~#"\'&()[]|`/\\@°+=*%€$£¢<>©®' } } },
           { use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]', outputPath } } },
         ],
       },
