@@ -2,6 +2,7 @@ import 'phaser';
 import ui from './assets/ui.png';
 import tilemap from './assets/tilemap';
 import tileset from './assets/tileset.png';
+import eighties from './assets/eighties.png';
 import pressStart2p from './assets/press-start-2p.bdf';
 import { preloadArticles, createArticle, cleanupArticles } from './article';
 
@@ -22,6 +23,7 @@ export default class Scene extends Phaser.Scene {
   preload() {
     this.load.image('ui', ui);
     this.load.image('tileset', tileset);
+    this.load.bitmapFont('eighties', eighties.texture, eighties.fontData);
     this.load.bitmapFont('press-start-2p', pressStart2p.texture, pressStart2p.fontData);
     preloadArticles(this, articles.map(a => a.querySelector('img').src));
   }
@@ -31,10 +33,10 @@ export default class Scene extends Phaser.Scene {
     const map = this.add.tilemap('tilemap');
     map.addTilesetImage('tileset', 'tileset');
     this.map = map.createStaticLayer('main', 'tileset');
-    this.map.y = 80;
     this.articles = articles.map((a, i) => createArticle(this, a, i));
     this.ui = this.add.nineslice(0, 0, this.map.width, 80, 'ui', [39, 70, 39, 70], 6);
-    this.text = this.add.bitmapText(24, 32, 'press-start-2p', 'danilo neves cruz. game developer');
+    this.text = this.add.bitmapText(0, 0, 'eighties', 'danilo neves cruz. game developer')
+      .setTint(0xffb9000);
 
     this.scale.on('resize', this.layout, this);
     this.layout();
@@ -52,16 +54,18 @@ export default class Scene extends Phaser.Scene {
 
   layout(size = this.scale.gameSize) {
     const { width } = size;
-    const scale = Math.max(1, Math.floor(width / this.map.width));
+    const scale = Math.max(2, Math.floor(width / this.map.width));
+    this.map.y = 80 * scale;
     this.map.setScale(scale);
     this.articles.forEach((article, i) => {
       article.layout(scale);
       article.setPosition(
         (48 + (i % 4) * (48 + 16)) * scale,
-        80 + Math.floor(i / 4) * (64 + 16) * scale,
+        (80 + Math.floor(i / 4) * (64 + 16)) * scale,
       );
     });
-    this.ui.resize(this.map.displayWidth, 80);
+    this.ui.setScale(scale);
+    this.ui.resize(this.map.width, 80);
     this.text.setScale(scale);
     this.cameras.main.setBounds(0, 0, this.map.displayWidth, this.map.displayHeight);
   }

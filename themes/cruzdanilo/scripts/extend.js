@@ -9,6 +9,7 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib');
+const outputPath = 'assets';
 const options = {
   context,
   entry: './main.js',
@@ -18,8 +19,14 @@ const options = {
   module: {
     rules: [
       { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' },
-      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: {} } },
-      { test: /\.png$/, use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]' } } },
+      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
+      {
+        test: /\.png$/,
+        oneOf: [
+          { test: /eighties/, use: { loader: 'png2fnt-loader', options: { chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:?!-_~#"\'&()[]|`/\\@°+=*%€$£¢<>©®' } } },
+          { use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]', outputPath } } },
+        ],
+      },
     ],
   },
   plugins: [
@@ -61,7 +68,7 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
     return set;
   }, new Set(baseCharset))].filter(ch => /[ \S]/.test(ch)).sort().join('');
   compiler.options.module.rules
-    .filter(r => r.use.loader === 'bdf2fnt-loader')
+    .filter(r => r.use && r.use.loader === 'bdf2fnt-loader')
     .forEach(r => Object.assign(r.use.options, { charset }));
 
   async function cruzdanilo(stats) {
