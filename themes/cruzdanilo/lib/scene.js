@@ -35,7 +35,7 @@ export default class Scene extends Phaser.Scene {
     this.map = map.createStaticLayer('main', 'tileset');
     this.articles = articles.map((a, i) => createArticle(this, a, i));
     this.ui = this.add.nineslice(0, 0, this.map.width, 80, 'ui', [39, 70, 39, 70], 6);
-    this.text = this.add.bitmapText(0, 0, 'eighties', 'danilo neves cruz. game developer')
+    this.text = this.add.bitmapText(24, 24, 'eighties', 'danilo neves cruz. game developer')
       .setTint(0xffb9000);
 
     this.scale.on('resize', this.layout, this);
