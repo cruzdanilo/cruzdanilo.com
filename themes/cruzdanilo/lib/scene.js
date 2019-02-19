@@ -52,7 +52,7 @@ export default class Scene extends Phaser.Scene {
 
   layout(size = this.scale.gameSize) {
     const { width } = size;
-    const scale = 2;
+    const scale = Math.max(1, Math.floor(width / this.map.width));
     this.map.setScale(scale);
     this.articles.forEach((article, i) => {
       article.layout(scale);

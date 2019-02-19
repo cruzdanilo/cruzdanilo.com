@@ -22,7 +22,7 @@ export function createArticle(scene, node, i) {
       frameRate: 10,
     });
   }
-  const image = scene.add.image(11 * 2, 11 * 2, `article-${i}`).setOrigin(0);
+  const image = scene.add.image(11, 11, `article-${i}`).setOrigin(0);
   const sprite = scene.add.sprite(0, 0, 'article-frame').setOrigin(0)
     .play('article-frame-idle');
   image.setInteractive()
@@ -34,6 +34,8 @@ export function createArticle(scene, node, i) {
       .anims.chain('article-frame-idle'));
   const container = scene.add.container().add([image, sprite]);
   container.layout = (scale) => {
+    image.setPosition(11 * scale, 11 * scale);
+    image.setScale(scale / 2);
     sprite.setScale(scale);
   };
   return container;
