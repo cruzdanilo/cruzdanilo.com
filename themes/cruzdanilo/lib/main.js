@@ -1,5 +1,5 @@
 import 'phaser';
-import { Plugin as NineSlicePlugin } from 'phaser3-nineslice';
+import NineSlicePlugin from 'phaser3-nineslice/src/Plugin';
 import Scene from './scene';
 
 const game = new Phaser.Game({
