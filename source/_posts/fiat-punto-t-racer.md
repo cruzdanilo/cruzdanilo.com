@@ -22,4 +22,4 @@ an unprecedented game between the real and the interactive world, where a real r
 
 role: game developer
 
-{% vimeo 5955635 %}
+<!-- {% vimeo 5955635 %} -->
