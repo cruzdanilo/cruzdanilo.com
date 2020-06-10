@@ -84,7 +84,7 @@ function buildCompiler() {
   compiler.outputFileSystem = new MemoryFS();
   compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
     .forEach((arg) => arg.split('\n')
-      .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] ?? name}]`, l))));
+      .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
   compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
     if (compilation.errors.length) return;
     chunks = [...compilation.namedChunks.values()].flatMap(({ files }) => [...files]);
