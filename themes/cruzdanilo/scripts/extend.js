@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const { createSha1Hash, stripHTML } = require('hexo-util');
 const MemoryFS = require('memory-fs');
 const TerserPlugin = require('terser-webpack-plugin');
+const { InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
@@ -70,6 +71,10 @@ const options = {
       'typeof PLUGIN_CAMERA3D': JSON.stringify(false),
       'typeof PLUGIN_FBINSTANT': JSON.stringify(false),
       'typeof FEATURE_SOUND': JSON.stringify(false),
+    }),
+    new InjectManifest({
+      swSrc: './serviceWorker.js',
+      dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
     }),
   ],
 };
@@ -148,6 +153,7 @@ hexo.extend.filter.register('server_middleware', (app) => {
   options.output.filename = '[name].js';
   options.entry = [options.entry, `webpack-hot-middleware/client?reload=true&path=${hmrEndpoint}`];
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
+  options.plugins.find((plugin) => plugin instanceof InjectManifest).config.exclude = [/.*/];
   buildCompiler();
   dev = webpackDevMiddleware(compiler);
   app.use(dev);

@@ -1,3 +1,4 @@
+import { Workbox } from 'workbox-window';
 import { AUTO } from 'phaser/src/const';
 import { RESIZE } from 'phaser/src/scale/const/SCALE_MODE_CONST';
 import Game from 'phaser/src/core/Game';
@@ -20,6 +21,13 @@ const game = new Game({
   disableContextMenu: true,
   plugins: { global: [NineSlicePlugin.DefaultCfg] },
 });
+
+if (navigator.serviceWorker) {
+  const wb = new Workbox('/serviceWorker.js');
+  wb.addEventListener('activated', ({ isUpdate }) => { if (isUpdate) window.location.reload(); });
+  wb.addEventListener('externalactivated', () => window.location.reload());
+  wb.register();
+}
 
 if (module.hot) {
   module.hot.accept();

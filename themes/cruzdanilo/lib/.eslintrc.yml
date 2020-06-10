@@ -3,3 +3,11 @@ env:
   node: false
 globals:
   module: readonly
+overrides:
+  - files:
+      - 'serviceWorker.js'
+    env:
+      browser: false
+      serviceworker: true
+    rules:
+      no-restricted-globals: off
