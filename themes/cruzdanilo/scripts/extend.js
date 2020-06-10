@@ -1,79 +1,109 @@
-/* eslint-env node */
-/* global hexo */
+require('dotenv').config();
 const path = require('path');
-const MemoryFS = require('memory-fs');
 const webpack = require('webpack');
-const { HashStream, stripHTML } = require('hexo-util');
-// const { GenerateSW } = require('workbox-webpack-plugin');
-const webpackDevMiddleware = require('webpack-dev-middleware');
+const { createSha1Hash, stripHTML } = require('hexo-util');
+const MemoryFS = require('memory-fs');
+const TerserPlugin = require('terser-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
+const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
+const fileLoader = {
+  loader: 'file-loader',
+  options: {
+    outputPath,
+    name(resource) {
+      const original = path.basename(resource, '.cast5');
+      const ext = path.extname(original);
+      return `${path.basename(original, ext)}.[contenthash:8]${ext}`;
+    },
+  },
+};
 const options = {
   context,
-  entry: './main.js',
-  output: { filename: '[name].[chunkhash:8].js', path: context },
   mode: 'production',
-  performance: { maxAssetSize: 2 * 1024 * 1024, maxEntrypointSize: 2 * 1024 * 1024 },
+  entry: './main.js',
+  resolve: { symlinks: false },
+  output: { filename: '[name].[contenthash:8].js', path: context },
+  infrastructureLogging: { level: 'none' },
+  stats: { colors: true, maxModules: Infinity },
+  performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
+  optimization: {
+    minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
+  },
   module: {
     rules: [
-      { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' },
-      { test: /\.bdf$/, use: { loader: 'bdf2fnt-loader', options: { outputPath } } },
+      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\/assets\/.*\.json$/, type: 'javascript/auto', use: fileLoader },
+      { test: /\.bdf.cast5$/, use: [{ loader: 'bdf2fnt-loader', options: { outputPath } }, decryptionLoader] },
       {
-        test: /\.png$/,
-        oneOf: [
-          { test: /eighties/, use: { loader: 'png2fnt-loader', options: { ignoreColumns: [284], chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,;:?!-_~#"\'&()[]|`/\\@°+=*%€$£¢<>©®' } } },
-          { use: { loader: 'file-loader', options: { name: '[name].[hash:8].[ext]', outputPath } } },
-        ],
+        test: /\.png.cast5$/,
+        oneOf: [{
+          test: /\.font\./,
+          use: ({ resource }) => [{
+            loader: 'png2fnt-loader',
+            options: {
+              ...fileLoader.options,
+              ...{
+                dark: { ignoreColumns: [123], chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+/\\' },
+              }[path.basename(resource.substring(0, resource.indexOf('.font')))],
+            },
+          }, decryptionLoader],
+        }, { use: [fileLoader, decryptionLoader] }],
       },
     ],
   },
   plugins: [
-    // new GenerateSW({ clientsClaim: true, skipWaiting: true }),
+    new BundleAnalyzerPlugin({
+      logLevel: 'silent',
+      openAnalyzer: false,
+      analyzerMode: 'static',
+      reportFilename: path.resolve(__dirname, '../../../report.html'),
+    }),
     new webpack.DefinePlugin({
-      CANVAS_RENDERER: JSON.stringify(true),
-      WEBGL_RENDERER: JSON.stringify(true),
+      'typeof CANVAS_RENDERER': JSON.stringify(true),
+      'typeof WEBGL_RENDERER': JSON.stringify(true),
+      'typeof EXPERIMENTAL': JSON.stringify(false),
+      'typeof PLUGIN_CAMERA3D': JSON.stringify(false),
+      'typeof PLUGIN_FBINSTANT': JSON.stringify(false),
+      'typeof FEATURE_SOUND': JSON.stringify(false),
     }),
   ],
-  stats: {
-    all: true,
-    colors: true,
-    assetsSort: 'name',
-    maxModules: Infinity,
-    reasons: false,
-    cached: false,
-    optimizationBailout: false,
-  },
 };
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 
 let compiler;
-let mainjs;
+let chunks;
 let dev;
 
 function buildCompiler() {
   compiler = webpack(options);
   compiler.outputFileSystem = new MemoryFS();
+  compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
+    .forEach((arg) => arg.split('\n')
+      .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] ?? name}]`, l))));
   compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
     if (compilation.errors.length) return;
-    [mainjs] = compilation.namedChunks.get('main').files;
+    chunks = [...compilation.namedChunks.values()].flatMap(({ files }) => [...files]);
   });
 }
 
-hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => {
+hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve) => {
   if (!compiler) buildCompiler();
   const charset = [...locals.posts.reduce((set, post) => {
-    Array.from(post.title + stripHTML(post.content)).forEach(c => set.add(c));
+    Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
     return set;
-  }, new Set(baseCharset))].filter(ch => /[ \S]/.test(ch)).sort().join('');
+  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
   compiler.options.module.rules
-    .filter(r => r.use && r.use.loader === 'bdf2fnt-loader')
-    .forEach(r => Object.assign(r.use.options, { charset }));
+    .filter((r) => r.use && r.use.loader === 'bdf2fnt-loader')
+    .forEach((r) => Object.assign(r.use.options, { charset }));
 
   async function cruzdanilo(stats) {
     resolve(stats.hasErrors() ? null : await Promise.all(Object.keys(stats.compilation.assets)
-      .map(k => new Promise((resolveFile) => {
+      .map((k) => new Promise((resolveFile) => {
         const absPath = path.join(compiler.outputPath, k);
         compiler.outputFileSystem.readFile(absPath, (err, data) => resolveFile({
           path: k,
@@ -91,7 +121,7 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
     compiler.run(async (err, stats) => {
       if (err) resolve(null);
       else {
-        hexo.log.info(`cruzdanilo\n${stats.toString(options.stats)}`);
+        stats.toString(options.stats).split('\n').forEach((l) => hexo.log.info('[cruzdanilo]', l));
         await cruzdanilo(stats);
       }
     });
@@ -99,8 +129,8 @@ hexo.extend.generator.register('cruzdanilo', locals => new Promise((resolve) => 
 }));
 
 hexo.extend.helper.register('main', function main() {
-  return `<script>document.body.className = 'game';</script>
-<script async defer src="${this.url_for(mainjs)}"></script>`;
+  return chunks.reduce((res, f) => `${res}\n<script async defer src="${this.url_for(f)}"></script>`,
+    '<script>document.body.className = \'game\';</script>');
 });
 
 hexo.extend.helper.register('cover', function cover(item) {
@@ -112,41 +142,31 @@ hexo.extend.helper.register('cover', function cover(item) {
 });
 
 hexo.extend.filter.register('server_middleware', (app) => {
+  const hmrEndpoint = '/webpack.hmr';
   options.mode = 'development';
   options.devtool = 'eval-source-map';
   options.output.filename = '[name].js';
-  const hmrEndpoint = '/webpack.hmr';
-  options.module.rules.push({
-    include: path.resolve(context, options.entry),
-    use: {
-      loader: require.resolve('./hmr-loader'),
-      options: { path: hmrEndpoint, reload: true },
-    },
-  });
+  options.entry = [options.entry, `webpack-hot-middleware/client?reload=true&path=${hmrEndpoint}`];
   options.plugins.push(new webpack.HotModuleReplacementPlugin());
   buildCompiler();
-  dev = webpackDevMiddleware(compiler, {
-    publicPath: compiler.options.output.publicPath,
-    logger: hexo.log,
-    stats: options.stats,
-  });
+  dev = webpackDevMiddleware(compiler);
   app.use(dev);
   const hot = webpackHotMiddleware(compiler, {
     path: hmrEndpoint,
-    log: hexo.log.info.bind(hexo.log),
+    log: (...args) => args.forEach((a) => a.split('\n').forEach((l) => hexo.log.info('[whm]', l))),
   });
   app.use(hot);
   const hashes = new Map();
   hexo.on('generateAfter', async () => {
     const reload = (await Promise.all(hexo.route.list()
-      .filter(route => !dev.context.webpackStats.compilation.assets[route])
-      .filter(route => hexo.route.isModified(route))
+      .filter((route) => !dev.context.stats.compilation.assets[route])
+      .filter((route) => hexo.route.isModified(route))
       .map(async (route) => {
         const hash = await new Promise((resolve, reject) => {
-          const stream = new HashStream();
-          hexo.route.get(route).pipe(stream)
+          const sha1 = createSha1Hash();
+          hexo.route.get(route).pipe(sha1)
             .on('error', reject)
-            .on('finish', () => resolve(stream.read().toString('hex')));
+            .on('finish', () => resolve(sha1.read().toString('hex')));
         });
         const lastHash = hashes.get(route);
         hashes.set(route, hash);

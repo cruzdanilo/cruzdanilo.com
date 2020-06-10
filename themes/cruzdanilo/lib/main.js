@@ -1,22 +1,31 @@
-import 'phaser';
+import { AUTO } from 'phaser/src/const';
+import { RESIZE } from 'phaser/src/scale/const/SCALE_MODE_CONST';
+import Game from 'phaser/src/core/Game';
 import NineSlicePlugin from 'phaser3-nineslice/src/Plugin';
-import Scene from './scene';
 
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
+import Home from './scenes/Home';
+import info from '../../../package.json';
+
+const game = new Game({
+  title: info.name,
+  version: info.version,
+  url: info.homepage,
+  scene: Home,
+  type: AUTO,
   width: 400,
   height: 224,
   pixelArt: true,
-  scale: { mode: Phaser.Scale.RESIZE, autoRound: true },
+  autoRound: true,
+  scaleMode: RESIZE,
+  disableContextMenu: true,
   plugins: { global: [NineSlicePlugin.DefaultCfg] },
-  scene: Scene,
 });
 
-// if (navigator.serviceWorker) navigator.serviceWorker.register('/service-worker.js');
-
 if (module.hot) {
-  module.hot.accept('./scene', () => {
-    game.scene.remove(Scene.KEY);
-    game.scene.add(Scene.KEY, Scene, true);
+  module.hot.accept();
+  module.hot.dispose(() => game.destroy());
+  module.hot.accept('./scenes/Home', () => {
+    game.scene.remove(Home.KEY);
+    game.scene.add(Home.KEY, Home, true);
   });
 }

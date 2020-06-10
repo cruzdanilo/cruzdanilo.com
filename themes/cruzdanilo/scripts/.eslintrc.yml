@@ -1,0 +1,9 @@
+extends:
+  - plugin:node/recommended
+globals:
+  hexo: readonly
+rules:
+  node/no-unpublished-require: off
+  import/no-extraneous-dependencies:
+    - error
+    - devDependencies: true

@@ -1,0 +1,5 @@
+env:
+  browser: true
+  node: false
+globals:
+  module: readonly

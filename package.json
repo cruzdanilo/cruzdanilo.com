@@ -1,56 +1,59 @@
 {
   "name": "cruzdanilo.com",
   "version": "0.2.0",
+  "homepage": "https://cruzdanilo.com",
+  "description": "danilo neves cruz",
   "private": true,
+  "license": "GPL-3.0-or-later",
+  "repository": "github:cruzdanilo/cruzdanilo.com",
+  "author": "danilo neves cruz <cruzdanilo@gmail.com> (https://cruzdanilo.com)",
   "scripts": {
+    "postinstall": "patch-package",
     "start": "hexo server",
     "build": "hexo generate",
     "rebuild": "hexo generate --force",
     "clean": "hexo clean",
-    "lint": "eslint themes/cruzdanilo/lib"
+    "lint": "eslint themes/cruzdanilo"
   },
   "hexo": {
-    "version": "3.8.0"
+    "version": "4.2.1"
   },
   "dependencies": {
-    "phaser": "^3.17.0",
-    "phaser3-nineslice": "^0.5.0"
+    "core-js": "^3.6.5",
+    "phaser": "^3.23.0",
+    "phaser3-nineslice": "^0.5.0",
+    "regenerator-runtime": "^0.13.5"
   },
   "devDependencies": {
-    "bdf2fnt-loader": "^2.0.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.3",
-    "file-loader": "^4.0.0",
-    "hexo": "^3.8.0",
-    "hexo-filter-responsive-images": "^1.4.1",
-    "hexo-generator-index": "^0.2.1",
-    "hexo-generator-sitemap": "^1.2.0",
-    "hexo-generator-tag": "^0.2.0",
-    "hexo-renderer-ejs": "^0.3.1",
-    "hexo-renderer-marked": "^1.0.1",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "bdf2fnt-loader": "^2.0.2",
+    "decryption-loader": "^1.1.8",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "file-loader": "^6.0.0",
+    "hexo": "^4.2.1",
+    "hexo-filter-responsive-images": "^1.5.0",
+    "hexo-generator-index": "^1.0.0",
+    "hexo-generator-sitemap": "^2.0.0",
+    "hexo-generator-tag": "^1.0.0",
+    "hexo-renderer-ejs": "^1.0.0",
+    "hexo-renderer-marked": "^2.0.0",
     "hexo-renderer-scss": "^1.2.0",
-    "hexo-server": "^0.3.3",
-    "hexo-util": "^0.6.3",
-    "loader-utils": "^1.2.3",
-    "memory-fs": "^0.4.1",
-    "png2fnt-loader": "^0.2.1",
-    "raw-loader": "^3.0.0",
-    "webpack": "^5.0.0-alpha.14",
-    "webpack-dev-middleware": "^3.7.0",
-    "webpack-hot-middleware": "^2.25.0",
-    "webpack-sources": "^2.0.0-beta.1",
-    "workbox-webpack-plugin": "^4.3.1"
-  },
-  "eslintConfig": {
-    "extends": "airbnb-base",
-    "env": {
-      "browser": true,
-      "node": false
-    },
-    "globals": {
-      "Phaser": false,
-      "module": false
-    }
+    "hexo-server": "^1.0.0",
+    "hexo-util": "^2.1.0",
+    "memory-fs": "^0.5.0",
+    "patch-package": "^6.2.2",
+    "png2fnt-loader": "^0.2.3",
+    "terser-webpack-plugin": "^3.0.3",
+    "webpack": "^5.0.0-beta.17",
+    "webpack-bundle-analyzer": "^3.8.0",
+    "webpack-dev-middleware": "^4.0.0-rc.1",
+    "webpack-hot-middleware": "^2.25.0"
   }
 }
