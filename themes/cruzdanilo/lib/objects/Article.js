@@ -46,13 +46,13 @@ export default class Article extends Container {
     return scene.sys.displayList.add(new Article(scene, i, x, y));
   }
 
-  static addAll(scene) {
+  static addAll(scene, points) {
     Article.createAnimations(scene);
-    return articles.map((_, i) => Article.add(scene, i));
+    return articles.map((_, i) => Article.add(scene, points[i].x, points[i].y, `article-${i}`));
   }
 
-  constructor(scene, i, x, y) {
-    const image = scene.add.image(11, 11, `article-${i}`).setOrigin(0);
+  constructor(scene, x, y, key) {
+    const image = scene.add.image(11, 11, key).setOrigin(0);
     const sprite = scene.add.sprite(0, 0, FRAME_KEY).setOrigin(0).play(`${FRAME_KEY}-idle`);
     image.setInteractive()
       .on('pointerdown', () => {})

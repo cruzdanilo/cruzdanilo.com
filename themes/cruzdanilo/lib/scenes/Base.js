@@ -36,7 +36,6 @@ export default class Base extends Scene {
     this.createMap();
     this.createUI();
     this.scale.on('resize', this.layout, this);
-    this.layout();
     const cursors = this.input.keyboard.createCursorKeys();
     this.controls = new FixedKeyControl({
       camera: this.cameras.main,
@@ -103,8 +102,7 @@ export default class Base extends Scene {
   refreshUI() {
     this.cache.image.remove('ui');
     this.cache.bitmapFont.remove('dark');
-    this.load.image('ui', ui);
-    this.load.bitmapFont('dark', dark.texture, dark.fontData);
+    this.loadUI();
     this.reload(() => {
       this.ui.destroy();
       this.text.destroy();
@@ -112,9 +110,9 @@ export default class Base extends Scene {
     });
   }
 
-  reload(cb) {
+  reload(callback) {
     const handleComplete = () => {
-      cb();
+      callback();
       this.layout();
       this.load.removeListener(COMPLETE_EVENT, handleComplete);
     };

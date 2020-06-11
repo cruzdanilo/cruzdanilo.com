@@ -14,8 +14,13 @@ export default class Home extends Base {
   }
 
   create() {
-    this.articles = Article.addAll(this);
     super.create();
+    this.createArticles();
+    this.layout();
+  }
+
+  createArticles() {
+    this.articles = Article.addAll(this, this.map.objects.find((l) => l.name === 'articles').objects);
   }
 
   layout(...args) {
@@ -34,9 +39,10 @@ export default class Home extends Base {
     module.hot.accept(['../assets/home.json', '../assets/home.png.cast5'],
       () => this.refreshMap(tilemap, { home: tileset }));
     module.hot.accept('../objects/Article', () => {
-      Article.destroyAnimations();
+      Article.destroyAnimations(this);
       this.articles.forEach((article) => article.destroy());
-      this.articles = Article.addAll(this);
+      this.createArticles();
+      this.layout();
     });
   }
 }
