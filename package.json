@@ -37,7 +37,7 @@
     "decryption-loader": "^1.1.8",
     "dotenv": "^8.2.0",
     "eslint": "^7.2.0",
-    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-node": "^11.1.0",
     "file-loader": "^6.0.0",
