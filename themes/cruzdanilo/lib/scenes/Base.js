@@ -17,14 +17,14 @@ import FixedKeyControl from 'phaser/src/cameras/controls/FixedKeyControl';
 import ui from '../assets/ui.png.cast5';
 import dark from '../assets/dark.font.png.cast5';
 
-const UI_HEIGHT = 80;
+export const UI_HEIGHT = 80;
 
 export default class Base extends Scene {
   constructor(config, mapSource, tilesets) {
     super(config);
     this.mapSource = mapSource;
     this.tilesets = tilesets;
-    if (module.hot && this.hot) this.hot();
+    if (module.hot) this.hot();
   }
 
   preload() {
@@ -85,6 +85,7 @@ export default class Base extends Scene {
     this.text.setScale(scale);
     this.cameras.main.setBounds(0, 0,
       this.map.widthInPixels * scale, UI_HEIGHT + this.map.heightInPixels * scale);
+    return scale;
   }
 
   refreshMap(mapSource, tilesets) {
