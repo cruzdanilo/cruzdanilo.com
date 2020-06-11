@@ -1,10 +1,10 @@
 diff --git a/node_modules/phaser3-nineslice/src/NineSlice.js b/node_modules/phaser3-nineslice/src/NineSlice.js
-index 56d34b1..31f73e1 100644
+index 56d34b1..71b3f0d 100644
 --- a/node_modules/phaser3-nineslice/src/NineSlice.js
 +++ b/node_modules/phaser3-nineslice/src/NineSlice.js
 @@ -1,4 +1,7 @@
 -import Phaser from 'phaser'
-+import 'phaser/src/gameobjects/image/ImageCreator'
++import Image from 'phaser/src/gameobjects/image/Image'
 +import RenderTexture from 'phaser/src/gameobjects/rendertexture/RenderTexture'
 +import EventEmitter from 'phaser/src/events/EventEmitter'
 +import Rectangle from 'phaser/src/geom/rectangle/Rectangle'
@@ -32,8 +32,22 @@ index 56d34b1..31f73e1 100644
  
      const { sourceKey, sourceFrame } = this.sliceConfig
      this.sourceTex = scene.sys.textures.get(this.sliceConfig.sourceKey)
+@@ -271,12 +274,7 @@ export default class NineSlice extends Phaser.GameObjects.RenderTexture {
+           this._g.strokeRect(this.x + x, this.y + y, wantWidth, wantHeight)
+         }
+ 
+-        const frameImage = this.scene.make.image({
+-          key: this.sourceTex.key,
+-          frame: curFrame.name,
+-          x: 0,
+-          y: 0,
+-        })
++        const frameImage = new Image(this.scene, 0, 0, this.sourceTex.key, curFrame.name)
+ 
+         const scaleX = wantWidth / curFrame.width
+         const scaleY = wantHeight / curFrame.height
 diff --git a/node_modules/phaser3-nineslice/src/Plugin.js b/node_modules/phaser3-nineslice/src/Plugin.js
-index 6ca398e..7552fd1 100644
+index 6ca398e..a4c4bb5 100644
 --- a/node_modules/phaser3-nineslice/src/Plugin.js
 +++ b/node_modules/phaser3-nineslice/src/Plugin.js
 @@ -1,8 +1,8 @@

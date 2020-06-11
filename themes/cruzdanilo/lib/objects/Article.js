@@ -1,9 +1,8 @@
-import 'phaser/src/gameobjects/image/ImageFactory';
-import 'phaser/src/gameobjects/sprite/SpriteFactory';
-import 'phaser/src/loader/LoaderPlugin';
-import 'phaser/src/loader/filetypes/ImageFile';
-import 'phaser/src/loader/filetypes/SpriteSheetFile';
+import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
+import SpriteSheetFile from 'phaser/src/loader/filetypes/SpriteSheetFile';
 import Container from 'phaser/src/gameobjects/container/Container';
+import Image from 'phaser/src/gameobjects/image/Image';
+import Sprite from 'phaser/src/gameobjects/sprite/Sprite';
 
 import frame from '../assets/article-frame.png.cast5';
 
@@ -13,12 +12,13 @@ const FRAME_KEY = 'article-frame';
 export default class Article extends Container {
   static preload(scene) {
     Article.loadFrame(scene);
-    articles.map((a) => a.querySelector('img').src)
-      .forEach((url, i) => scene.load.image(`article-${i}`, url));
+    articles.forEach((a, i) => scene.load.addFile(new ImageFile(scene.load,
+      `article-${i}`, a.querySelector('img').src)));
   }
 
   static loadFrame(scene) {
-    scene.load.spritesheet(FRAME_KEY, frame, { frameWidth: 48, frameHeight: 64 });
+    scene.load.addFile(new SpriteSheetFile(scene.load,
+      FRAME_KEY, frame, { frameWidth: 48, frameHeight: 64 }));
   }
 
   static createAnimations(scene) {
@@ -52,8 +52,9 @@ export default class Article extends Container {
   }
 
   constructor(scene, x, y, key) {
-    const image = scene.add.image(11, 11, key).setOrigin(0);
-    const sprite = scene.add.sprite(0, 0, FRAME_KEY).setOrigin(0).play(`${FRAME_KEY}-idle`);
+    const image = new Image(scene, 11, 11, key).setOrigin(0);
+    const sprite = new Sprite(scene, 0, 0, FRAME_KEY).setOrigin(0).play(`${FRAME_KEY}-idle`);
+    scene.sys.updateList.add(sprite);
     image.setInteractive()
       .on('pointerdown', () => {})
       .on('pointerover', () => sprite

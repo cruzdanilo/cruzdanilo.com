@@ -1,21 +1,15 @@
-import 'phaser/src/cameras/2d/CameraManager';
-import 'phaser/src/input/InputPlugin';
-import 'phaser/src/input/keyboard/KeyboardPlugin';
-import 'phaser/src/loader/LoaderPlugin';
-import 'phaser/src/gameobjects/DisplayList';
-import 'phaser/src/gameobjects/UpdateList';
-import 'phaser/src/gameobjects/bitmaptext/static/BitmapTextFactory';
-import 'phaser/src/loader/filetypes/BitmapFontFile';
-import 'phaser/src/loader/filetypes/ImageFile';
-import 'phaser/src/loader/filetypes/TilemapJSONFile';
-import 'phaser/src/scene/ScenePlugin';
-import 'phaser/src/tilemaps/TilemapFactory';
-import COMPLETE_EVENT from 'phaser/src/loader/events/COMPLETE_EVENT';
-import Scene from 'phaser/src/scene/Scene';
+import BitmapText from 'phaser/src/gameobjects/bitmaptext/static/BitmapText';
+import BitmapFontFile from 'phaser/src/loader/filetypes/BitmapFontFile';
 import FixedKeyControl from 'phaser/src/cameras/controls/FixedKeyControl';
+import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
+import NineSlice from 'phaser3-nineslice/src/NineSlice';
+import ParseToTilemap from 'phaser/src/tilemaps/ParseToTilemap';
+import Scene from 'phaser/src/scene/Scene';
+import TilemapJSONFile from 'phaser/src/loader/filetypes/TilemapJSONFile';
+import COMPLETE_EVENT from 'phaser/src/loader/events/COMPLETE_EVENT';
 
-import ui from '../assets/ui.png.cast5';
 import dark from '../assets/dark.font.png.cast5';
+import ui from '../assets/ui.png.cast5';
 
 export const UI_HEIGHT = 80;
 
@@ -36,14 +30,11 @@ export default class Base extends Scene {
     this.createMap();
     this.createUI();
     this.scale.on('resize', this.layout, this);
-    const cursors = this.input.keyboard.createCursorKeys();
+    const {
+      left, right, up, down,
+    } = this.input.keyboard.createCursorKeys();
     this.controls = new FixedKeyControl({
-      camera: this.cameras.main,
-      left: cursors.left,
-      right: cursors.right,
-      up: cursors.up,
-      down: cursors.down,
-      speed: 0.2,
+      left, right, up, down, speed: 0.2, camera: this.cameras.main,
     });
   }
 
@@ -52,25 +43,28 @@ export default class Base extends Scene {
   }
 
   loadMap() {
-    this.load.tilemapTiledJSON(this.sys.config, this.mapSource);
-    Object.entries(this.tilesets).forEach(([name, file]) => this.load.image(name, file));
+    this.load.addFile(new TilemapJSONFile(this.load, this.sys.config, this.mapSource));
+    Object.entries(this.tilesets)
+      .forEach(([name, file]) => this.load.addFile(new ImageFile(this.load, name, file)));
+  }
+
+  loadUI() {
+    this.load.addFile(new ImageFile(this.load, 'ui', ui));
+    this.load.addFile(new BitmapFontFile(this.load, 'dark', dark.texture, dark.fontData).files);
   }
 
   createMap() {
-    this.map = this.add.tilemap(this.sys.config);
+    this.map = ParseToTilemap(this, this.sys.config);
     Object.entries(this.tilesets).forEach(([name]) => this.map.addTilesetImage(name, name));
     this.map.layers.forEach(({ name }) => this.map.createStaticLayer(name, this.map.tilesets));
   }
 
-  loadUI() {
-    this.load.image('ui', ui);
-    this.load.bitmapFont('dark', dark.texture, dark.fontData);
-  }
-
   createUI() {
-    this.ui = this.add.nineslice(0, 0, this.map.widthInPixels, UI_HEIGHT, 'ui', [39, 70, 39, 70], 6);
-    this.text = this.add.bitmapText(24, 24, 'dark', 'DANILO NEVES CRUZ\nGAME DEVELOPER')
-      .setTint(0xffb9000);
+    this.ui = this.sys.displayList.add(new NineSlice(this,
+      { sourceKey: 'ui', sourceLayout: { width: 70, height: 39 } },
+      { width: this.map.widthInPixels, height: UI_HEIGHT }));
+    this.text = this.sys.displayList.add(new BitmapText(this,
+      24, 24, 'dark', 'DANILO NEVES CRUZ\nGAME DEVELOPER')).setTint(0xffb9000);
   }
 
   layout(size = this.scale.gameSize) {

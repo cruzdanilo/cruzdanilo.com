@@ -1,8 +1,14 @@
+import 'phaser/src/cameras/2d/CameraManager';
+import 'phaser/src/gameobjects/DisplayList';
+import 'phaser/src/gameobjects/UpdateList';
+import 'phaser/src/input/InputPlugin';
+import 'phaser/src/input/keyboard/KeyboardPlugin';
+import 'phaser/src/loader/LoaderPlugin';
+import 'phaser/src/scene/ScenePlugin';
 import { Workbox } from 'workbox-window';
 import { AUTO } from 'phaser/src/const';
 import { RESIZE } from 'phaser/src/scale/const/SCALE_MODE_CONST';
 import Game from 'phaser/src/core/Game';
-import NineSlicePlugin from 'phaser3-nineslice/src/Plugin';
 
 import Home from './scenes/Home';
 import info from '../../../package.json';
@@ -19,7 +25,6 @@ const game = new Game({
   autoRound: true,
   scaleMode: RESIZE,
   disableContextMenu: true,
-  plugins: { global: [NineSlicePlugin.DefaultCfg] },
 });
 
 if (navigator.serviceWorker) {
