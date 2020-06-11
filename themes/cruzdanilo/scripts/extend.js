@@ -27,7 +27,6 @@ const options = {
   context,
   mode: 'production',
   entry: './main.js',
-  resolve: { symlinks: false },
   output: { filename: '[name].[contenthash:8].js', path: context },
   infrastructureLogging: { level: 'none' },
   stats: { colors: true, maxModules: Infinity },
