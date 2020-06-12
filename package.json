@@ -15,6 +15,9 @@
     "clean": "hexo clean",
     "lint": "eslint themes/cruzdanilo"
   },
+  "engines": {
+    "node": "14"
+  },
   "hexo": {
     "version": "4.2.1"
   },
