@@ -72,7 +72,7 @@ const options = {
       'typeof FEATURE_SOUND': JSON.stringify(false),
     }),
     new InjectManifest({
-      swSrc: './serviceWorker.js',
+      swSrc: path.resolve(__dirname, '../lib/serviceWorker.js'),
       dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
     }),
   ],
