@@ -91,7 +91,7 @@ function buildCompiler() {
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
   compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
     if (compilation.errors.length) return;
-    chunks = [...compilation.namedChunks.values()].flatMap(({ files }) => [...files]);
+    chunks = [...compilation.namedChunks.values()].flatMap(({ files: [file] }) => file);
   });
 }
 
