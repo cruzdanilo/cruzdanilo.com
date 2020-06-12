@@ -1,7 +1,7 @@
 require('dotenv').config();
 const path = require('path');
-const webpack = require('webpack');
 const { createSha1Hash, stripHTML } = require('hexo-util');
+const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
 const MemoryFS = require('memory-fs');
 const TerserPlugin = require('terser-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
@@ -57,19 +57,19 @@ const options = {
     ],
   },
   plugins: [
-    new BundleAnalyzerPlugin({
-      logLevel: 'silent',
-      openAnalyzer: false,
-      analyzerMode: 'static',
-      reportFilename: path.resolve(__dirname, '../../../report.html'),
-    }),
-    new webpack.DefinePlugin({
+    new DefinePlugin({
       'typeof CANVAS_RENDERER': JSON.stringify(true),
       'typeof WEBGL_RENDERER': JSON.stringify(true),
       'typeof EXPERIMENTAL': JSON.stringify(false),
       'typeof PLUGIN_CAMERA3D': JSON.stringify(false),
       'typeof PLUGIN_FBINSTANT': JSON.stringify(false),
       'typeof FEATURE_SOUND': JSON.stringify(false),
+    }),
+    new BundleAnalyzerPlugin({
+      logLevel: 'silent',
+      openAnalyzer: false,
+      analyzerMode: 'static',
+      reportFilename: path.resolve(__dirname, '../../../report.html'),
     }),
     new InjectManifest({
       swSrc: path.resolve(__dirname, '../lib/serviceWorker.js'),
@@ -151,7 +151,7 @@ hexo.extend.filter.register('server_middleware', (app) => {
   options.devtool = 'eval-source-map';
   options.output.filename = '[name].js';
   options.entry = [options.entry, `webpack-hot-middleware/client?reload=true&path=${hmrEndpoint}`];
-  options.plugins.push(new webpack.HotModuleReplacementPlugin());
+  options.plugins.push(new HotModuleReplacementPlugin());
   options.plugins.find((plugin) => plugin instanceof InjectManifest).config.exclude = [/.*/];
   buildCompiler();
   dev = webpackDevMiddleware(compiler);
