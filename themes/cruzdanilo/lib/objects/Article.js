@@ -12,8 +12,8 @@ const FRAME_KEY = 'article-frame';
 export default class Article extends Container {
   static preload(scene) {
     Article.loadFrame(scene);
-    articles.forEach((a, i) => scene.load.addFile(new ImageFile(scene.load,
-      `article-${i}`, a.querySelector('img').src)));
+    articles.forEach((article, i) => scene.load.addFile(new ImageFile(scene.load,
+      `article-${i}`, article.dataset.cover)));
   }
 
   static loadFrame(scene) {
@@ -38,8 +38,8 @@ export default class Article extends Container {
   }
 
   static destroyAnimations(scene) {
-    scene.anims.remove('article-frame-idle');
-    scene.anims.remove('article-frame-open');
+    scene.anims.remove(`${FRAME_KEY}-idle`);
+    scene.anims.remove(`${FRAME_KEY}-open`);
   }
 
   static add(scene, i, x, y) {
@@ -52,10 +52,9 @@ export default class Article extends Container {
   }
 
   constructor(scene, x, y, key) {
-    const image = new Image(scene, 11, 11, key).setOrigin(0);
-    const sprite = new Sprite(scene, 0, 0, FRAME_KEY).setOrigin(0).play(`${FRAME_KEY}-idle`);
-    scene.sys.updateList.add(sprite);
-    image.setInteractive()
+    const sprite = scene.sys.updateList.add(new Sprite(scene, 0, 0, FRAME_KEY)).setOrigin(0)
+      .play(`${FRAME_KEY}-idle`);
+    const image = new Image(scene, 11, 11, key).setOrigin(0).setInteractive()
       .on('pointerdown', () => {})
       .on('pointerover', () => sprite
         .play(`${FRAME_KEY}-open`, false, sprite.anims.currentFrame.index))
