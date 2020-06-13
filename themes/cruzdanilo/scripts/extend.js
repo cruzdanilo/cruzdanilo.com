@@ -89,13 +89,19 @@ function buildCompiler() {
   compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
     .forEach((arg) => arg.split('\n')
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
-  compiler.hooks.afterEmit.tap('cruzdanilo', (compilation) => {
-    if (compilation.errors.length) return;
-    chunks = [...compilation.namedChunks.values()].flatMap(({ files: [file] }) => file);
-  });
 }
 
-hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve) => {
+hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, reject) => {
+  async function cruzdanilo(stats) {
+    if (stats.hasErrors()) return reject(stats.errors);
+    const { assets, namedChunks } = stats.compilation;
+    chunks = [...namedChunks.values()].flatMap(({ files: [file] }) => file);
+    return resolve(await Promise.all(Object.keys(assets).map((k) => new Promise((resolveFile) => {
+      compiler.outputFileSystem.readFile(path.join(compiler.outputPath, k),
+        (err, data) => resolveFile({ path: k, data: err ? null : data }));
+    }))));
+  }
+
   if (!compiler) buildCompiler();
   const charset = [...locals.posts.reduce((set, post) => {
     Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
@@ -105,17 +111,6 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve) =
     .filter((r) => r.use && r.use.loader === 'bdf2fnt-loader')
     .forEach((r) => Object.assign(r.use.options, { charset }));
 
-  async function cruzdanilo(stats) {
-    resolve(stats.hasErrors() ? null : await Promise.all(Object.keys(stats.compilation.assets)
-      .map((k) => new Promise((resolveFile) => {
-        const absPath = path.join(compiler.outputPath, k);
-        compiler.outputFileSystem.readFile(absPath, (err, data) => resolveFile({
-          path: k,
-          data: err ? null : data,
-        }));
-      }))));
-  }
-
   if (dev) {
     if (charset !== dev.charset) {
       dev.charset = charset;
@@ -123,9 +118,10 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve) =
     } else dev.waitUntilValid(cruzdanilo);
   } else {
     compiler.run(async (err, stats) => {
-      if (err) resolve(null);
+      if (err) reject(err);
       else {
-        stats.toString(options.stats).split('\n').forEach((l) => hexo.log.info('[cruzdanilo]', l));
+        stats.toString(options.stats).split('\n')
+          .forEach((line) => hexo.log[stats.hasErrors() ? 'error' : 'info']('[cruzdanilo]', line));
         await cruzdanilo(stats);
       }
     });
