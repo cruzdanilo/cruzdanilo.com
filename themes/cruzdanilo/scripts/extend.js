@@ -1,8 +1,8 @@
 require('dotenv').config();
 const path = require('path');
 const { createSha1Hash, stripHTML } = require('hexo-util');
+const { Volume, createFsFromVolume } = require('memfs');
 const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
-const MemoryFS = require('memory-fs');
 const TerserPlugin = require('terser-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -85,7 +85,7 @@ let dev;
 
 function buildCompiler() {
   compiler = webpack(options);
-  compiler.outputFileSystem = new MemoryFS();
+  compiler.outputFileSystem = createFsFromVolume(new Volume());
   compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
     .forEach((arg) => arg.split('\n')
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
