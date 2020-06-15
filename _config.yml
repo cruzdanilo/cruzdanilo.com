@@ -1,77 +1,15 @@
-# Hexo Configuration
-## Docs: https://hexo.io/docs/configuration.html
-
-# Site
+# https://hexo.io/docs/configuration.html
 title: danilo neves cruz
 subtitle: game developer
 description: i'm a computer scientist and i've been developing games and interactive digital content for more than 10 years. this is my portfolio.
 author: danilo neves cruz
-language:
-timezone:
-
-# URL
+language: en
 url: https://cruzdanilo.com
-root: /
 permalink: :title/
-permalink_defaults:
-
-# Directory
-source_dir: source
-public_dir: public
-tag_dir: tags
-archive_dir: archives
-category_dir: categories
-code_dir: downloads/code
-i18n_dir: :lang
-skip_render:
-
-# Writing
-new_post_name: :title.md
-default_layout: post
-titlecase: false
-external_link: true
-filename_case: 0
-render_drafts: false
-post_asset_folder: true
-relative_link: false
-future: true
-highlight:
-  enable: true
-  line_number: true
-  auto_detect: false
-  tab_replace:
-
-# Home page setting
-index_generator:
-  path: ''
-  per_page: 20
-  order_by: -date
-
-# Category & Tag
-default_category: uncategorized
-category_map:
-tag_map:
-
-# Date / Time format
-## http://momentjs.com/docs/#/displaying/format/
-date_format: YYYY-MM-DD
-time_format: HH:mm:ss
-
-# Pagination
-per_page: 20
-pagination_dir: page
-
-# Extensions
 theme: cruzdanilo
+post_asset_folder: true
+per_page: 0
 
-# Deployment
-## https://hexo.io/docs/deployment.html
-deploy:
-  type: git
-  repo: git@github.com:cruzdanilo/cruzdanilo.com.git
-  branch: master
-
-# Image optimization
 ## https://github.com/hexojs/hexo-filter-responsive-images
 responsive_images:
   pattern: '*/*.+(png|jpg|jpeg)'
