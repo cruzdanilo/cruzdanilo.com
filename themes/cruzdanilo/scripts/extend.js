@@ -133,9 +133,9 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
 
 hexo.extend.helper.register('entrypoints', () => entrypoints);
 hexo.extend.helper.register('content', (indent) => beautify(stringify({
-  posts: hexo.locals.get('posts').sort('-date').map(({
-    slug, cover_index: cover, photos,
-  }) => ({ slug, cover: urlFor(cover), photos: photos.map(urlFor) })),
+  posts: hexo.locals.get('posts').sort('-date').map((post) => ({
+    path: urlFor(post.path), cover: post.cover, photos: post.photos,
+  })),
 }), { indent_size: 2, indent_level: indent }).trim());
 
 hexo.extend.filter.register('server_middleware', (app) => {

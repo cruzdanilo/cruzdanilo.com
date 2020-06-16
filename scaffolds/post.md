@@ -4,6 +4,6 @@ subtitle:
 date: {{ date }}
 categories:
 tags:
-cover_index:
+cover:
 photos:
 ---

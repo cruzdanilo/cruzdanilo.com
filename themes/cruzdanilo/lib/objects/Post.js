@@ -11,7 +11,8 @@ const FRAME_KEY = 'post-frame';
 export default class Post extends Container {
   static preload(scene) {
     Post.loadFrame(scene);
-    cruzdanilo.posts.forEach((p) => scene.load.addFile(new ImageFile(scene.load, p.slug, p.cover)));
+    cruzdanilo.posts.forEach(({ path, cover }) => scene.load.addFile(new ImageFile(scene.load,
+      path, `${path}${cover}`)));
   }
 
   static loadFrame(scene) {
@@ -46,7 +47,7 @@ export default class Post extends Container {
 
   static addAll(scene, points) {
     Post.createAnimations(scene);
-    return cruzdanilo.posts.map(({ slug }, i) => Post.add(scene, points[i].x, points[i].y, slug));
+    return cruzdanilo.posts.map(({ path }, i) => Post.add(scene, points[i].x, points[i].y, path));
   }
 
   constructor(scene, x, y, key) {
