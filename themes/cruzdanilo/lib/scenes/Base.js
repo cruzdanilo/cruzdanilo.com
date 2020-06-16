@@ -98,8 +98,8 @@ export default class Base extends Scene {
     this.cache.bitmapFont.remove('dark');
     this.loadUI();
     this.reload(() => {
-      this.ui.destroy();
-      this.text.destroy();
+      try { this.ui.destroy(); } catch { /**/ }
+      try { this.text.destroy(); } catch { /**/ }
       this.createUI();
     });
   }

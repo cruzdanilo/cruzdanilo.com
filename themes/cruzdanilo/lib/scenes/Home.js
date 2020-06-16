@@ -40,7 +40,7 @@ export default class Home extends Base {
       () => this.refreshMap(tilemap, { home: tileset }));
     module.hot.accept('../objects/Post', () => {
       Post.destroyAnimations(this);
-      this.posts.forEach((post) => post.destroy());
+      try { this.posts.forEach((post) => post.destroy()); } catch { /**/ }
       this.createPosts();
       this.layout();
     });

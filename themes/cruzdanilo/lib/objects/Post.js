@@ -50,20 +50,23 @@ export default class Post extends Container {
   }
 
   constructor(scene, x, y, key) {
-    const sprite = scene.sys.updateList.add(new Sprite(scene, 0, 0, FRAME_KEY)).setOrigin(0)
-      .play(`${FRAME_KEY}-idle`);
-    const image = new Image(scene, 11, 11, key).setOrigin(0).setInteractive()
-      .on('pointerdown', () => {})
-      .on('pointerover', () => sprite
-        .play(`${FRAME_KEY}-open`, false, sprite.anims.currentFrame.index))
-      .on('pointerout', () => sprite
-        .anims.playReverse(`${FRAME_KEY}-open`, false, sprite.anims.currentFrame.index)
-        .anims.chain(`${FRAME_KEY}-idle`));
-    super(scene, x, y, [image, sprite]);
-    this.image = image;
-    this.frame = sprite;
-    this.setDepth(1);
+    super(scene, x, y);
     if (module.hot) this.hot();
+    this.createFrame();
+    this.image = new Image(scene, 11, 11, key).setOrigin(0).setInteractive()
+      .on('pointerdown', () => {})
+      .on('pointerover', () => this.frame
+        .play(`${FRAME_KEY}-open`, false, this.frame.anims.currentFrame.index))
+      .on('pointerout', () => this.frame
+        .anims.playReverse(`${FRAME_KEY}-open`, false, this.frame.anims.currentFrame.index)
+        .anims.chain(`${FRAME_KEY}-idle`));
+    this.add([this.image, this.frame]);
+    this.setDepth(1);
+  }
+
+  createFrame() {
+    this.frame = this.scene.sys.updateList.add(new Sprite(this.scene, 0, 0, FRAME_KEY)).setOrigin(0)
+      .play(`${FRAME_KEY}-idle`);
   }
 
   layout(scale) {
@@ -77,7 +80,7 @@ export default class Post extends Container {
       this.scene.cache.image.remove(FRAME_KEY);
       Post.loadFrame(this.scene);
       this.scene.reload(() => {
-        this.frame.destroy();
+        try { this.frame.destroy(); } catch { /**/ }
         this.createFrame();
       });
     });
