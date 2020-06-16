@@ -4,16 +4,14 @@ import Container from 'phaser/src/gameobjects/container/Container';
 import Image from 'phaser/src/gameobjects/image/Image';
 import Sprite from 'phaser/src/gameobjects/sprite/Sprite';
 
-import frame from '../assets/article-frame.png.cast5';
+import frame from '../assets/post-frame.png.cast5';
 
-const articles = Object.freeze(Array.from(document.querySelectorAll('article')));
-const FRAME_KEY = 'article-frame';
+const FRAME_KEY = 'post-frame';
 
-export default class Article extends Container {
+export default class Post extends Container {
   static preload(scene) {
-    Article.loadFrame(scene);
-    articles.forEach((article, i) => scene.load.addFile(new ImageFile(scene.load,
-      `article-${i}`, article.dataset.cover)));
+    Post.loadFrame(scene);
+    cruzdanilo.posts.forEach((p) => scene.load.addFile(new ImageFile(scene.load, p.slug, p.cover)));
   }
 
   static loadFrame(scene) {
@@ -43,12 +41,12 @@ export default class Article extends Container {
   }
 
   static add(scene, i, x, y) {
-    return scene.sys.displayList.add(new Article(scene, i, x, y));
+    return scene.sys.displayList.add(new Post(scene, i, x, y));
   }
 
   static addAll(scene, points) {
-    Article.createAnimations(scene);
-    return articles.map((_, i) => Article.add(scene, points[i].x, points[i].y, `article-${i}`));
+    Post.createAnimations(scene);
+    return cruzdanilo.posts.map(({ slug }, i) => Post.add(scene, points[i].x, points[i].y, slug));
   }
 
   constructor(scene, x, y, key) {
@@ -75,9 +73,9 @@ export default class Article extends Container {
   }
 
   hot() {
-    module.hot.accept('../assets/article-frame.png.cast5', () => {
+    module.hot.accept('../assets/post-frame.png.cast5', () => {
       this.scene.cache.image.remove(FRAME_KEY);
-      Article.loadFrame(this.scene);
+      Post.loadFrame(this.scene);
       this.scene.reload(() => {
         this.frame.destroy();
         this.createFrame();

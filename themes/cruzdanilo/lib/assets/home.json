@@ -25,7 +25,7 @@
         {
          "draworder":"topdown",
          "id":2,
-         "name":"articles",
+         "name":"posts",
          "objects":[
                 {
                  "height":64,

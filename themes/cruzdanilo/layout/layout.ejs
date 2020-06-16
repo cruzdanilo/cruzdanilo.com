@@ -1,11 +1,16 @@
 <!doctype html>
-<html lang="en">
-<title>cruzdanilo.com</title>
+<html lang="<%= config.language %>">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
-<style media="screen">
-  body.game article { display: none; }
-  body.game { background: black; margin: 0; overflow: hidden; }
-</style>
-<%- body %>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<style>body { background: black; margin: 0; overflow: hidden; }</style>
+<title><%= config.title %></title>
+<body>
+<%- body -%>
+  <script>
+var cruzdanilo = Object.freeze(<%- content() -%>);
+  </script>
+<%_ entrypoints().forEach((src) => { _%>
+  <script defer src="<%= src %>"></script>
+<%_ }) _%>
+</body>
 </html>

@@ -1,14 +1,17 @@
 require('dotenv').config();
-const path = require('path');
-const { createSha1Hash, stripHTML } = require('hexo-util');
+const { stringify } = require('json5');
+const { js: beautify } = require('js-beautify');
 const { Volume, createFsFromVolume } = require('memfs');
+const { createSha1Hash, stripHTML, url_for: unboundUrlFor } = require('hexo-util');
 const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
-const TerserPlugin = require('terser-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
+const TerserPlugin = require('terser-webpack-plugin');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const path = require('path');
 
+const urlFor = unboundUrlFor.bind(hexo);
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
 const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
@@ -80,7 +83,7 @@ const options = {
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 
 let compiler;
-let chunks;
+let entrypoints;
 let dev;
 
 function buildCompiler() {
@@ -94,8 +97,8 @@ function buildCompiler() {
 hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, reject) => {
   async function cruzdanilo(stats) {
     if (stats.hasErrors()) return reject(stats.errors);
-    const { assets, namedChunks } = stats.compilation;
-    chunks = [...namedChunks.values()].flatMap(({ files: [file] }) => file);
+    const { assets, entrypoints: eps } = stats.compilation;
+    entrypoints = [...eps.values()].flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
     return resolve(await Promise.all(Object.keys(assets).map((k) => new Promise((resolveFile) => {
       compiler.outputFileSystem.readFile(path.join(compiler.outputPath, k),
         (err, data) => resolveFile({ path: k, data: err ? null : data }));
@@ -128,18 +131,12 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
   }
 }));
 
-hexo.extend.helper.register('main', function main() {
-  return chunks.reduce((res, f) => `${res}\n<script async defer src="${this.url_for(f)}"></script>`,
-    '<script>document.body.className = \'game\';</script>');
-});
-
-hexo.extend.helper.register('cover', function cover(item) {
-  const asset = hexo.model('PostAsset').findOne({
-    post: item._id, // eslint-disable-line no-underscore-dangle
-    slug: item.cover_image,
-  });
-  return asset ? this.url_for(asset.path) : null;
-});
+hexo.extend.helper.register('entrypoints', () => entrypoints);
+hexo.extend.helper.register('content', (indent) => beautify(stringify({
+  posts: hexo.locals.get('posts').sort('-date').map(({
+    slug, cover_index: cover, photos,
+  }) => ({ slug, cover: urlFor(cover), photos: photos.map(urlFor) })),
+}), { indent_size: 2, indent_level: indent }).trim());
 
 hexo.extend.filter.register('server_middleware', (app) => {
   const hmrEndpoint = '/webpack.hmr';

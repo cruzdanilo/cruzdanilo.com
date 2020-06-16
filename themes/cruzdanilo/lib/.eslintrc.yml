@@ -3,11 +3,15 @@ env:
   node: false
 globals:
   module: readonly
+  cruzdanilo: readonly
 overrides:
   - files:
       - 'serviceWorker.js'
     env:
       browser: false
       serviceworker: true
+    globals:
+      module: off
+      cruzdanilo: off
     rules:
       no-restricted-globals: off

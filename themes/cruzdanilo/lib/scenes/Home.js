@@ -1,5 +1,5 @@
 import Base, { UI_HEIGHT } from './Base';
-import Article from '../objects/Article';
+import Post from '../objects/Post';
 import tilemap from '../assets/home.json';
 import tileset from '../assets/home.png.cast5';
 
@@ -10,24 +10,24 @@ export default class Home extends Base {
 
   preload() {
     super.preload();
-    Article.preload(this);
+    Post.preload(this);
   }
 
   create() {
     super.create();
-    this.createArticles();
+    this.createPosts();
     this.layout();
   }
 
-  createArticles() {
-    this.articles = Article.addAll(this, this.map.objects.find((l) => l.name === 'articles').objects);
+  createPosts() {
+    this.posts = Post.addAll(this, this.map.objects.find((l) => l.name === 'posts').objects);
   }
 
   layout(...args) {
     const scale = super.layout(...args);
-    this.articles.forEach((article, i) => {
-      article.layout(scale);
-      article.setPosition(
+    this.posts.forEach((post, i) => {
+      post.layout(scale);
+      post.setPosition(
         (48 + (i % 4) * (48 + 16)) * scale,
         (UI_HEIGHT + Math.floor(i / 4) * (64 + 16)) * scale,
       );
@@ -38,10 +38,10 @@ export default class Home extends Base {
     super.hot();
     module.hot.accept(['../assets/home.json', '../assets/home.png.cast5'],
       () => this.refreshMap(tilemap, { home: tileset }));
-    module.hot.accept('../objects/Article', () => {
-      Article.destroyAnimations(this);
-      this.articles.forEach((article) => article.destroy());
-      this.createArticles();
+    module.hot.accept('../objects/Post', () => {
+      Post.destroyAnimations(this);
+      this.posts.forEach((post) => post.destroy());
+      this.createPosts();
       this.layout();
     });
   }
