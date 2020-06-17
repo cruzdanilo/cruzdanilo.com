@@ -139,18 +139,17 @@ hexo.extend.helper.register('content', (indent) => beautify(stringify({
 }), { indent_size: 2, indent_level: indent }).trim());
 
 hexo.extend.filter.register('server_middleware', (app) => {
-  const hmrEndpoint = '/webpack.hmr';
   options.mode = 'development';
   options.devtool = 'eval-source-map';
   options.output.filename = '[name].js';
-  options.entry = [options.entry, `webpack-hot-middleware/client?reload=true&path=${hmrEndpoint}`];
+  options.entry = [options.entry, './hmrClient'];
   options.plugins.push(new HotModuleReplacementPlugin());
   options.plugins.find((plugin) => plugin instanceof InjectManifest).config.exclude = [/.*/];
   buildCompiler();
   dev = webpackDevMiddleware(compiler);
   app.use(dev);
   const hot = webpackHotMiddleware(compiler, {
-    path: hmrEndpoint,
+    path: '/webpack.hmr',
     log: (...args) => args.forEach((a) => a.split('\n').forEach((l) => hexo.log.info('[whm]', l))),
   });
   app.use(hot);
