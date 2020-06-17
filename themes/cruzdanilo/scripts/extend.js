@@ -83,6 +83,7 @@ const options = {
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 
 let compiler;
+let content;
 let entrypoints;
 let dev;
 
@@ -106,6 +107,11 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
   }
 
   if (!compiler) buildCompiler();
+  content = beautify(stringify({
+    posts: locals.posts.sort('-date').map((post) => ({
+      path: urlFor(post.path), cover: post.cover, photos: post.photos,
+    })),
+  }), { indent_size: 2 }).trim();
   const charset = [...locals.posts.reduce((set, post) => {
     Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
     return set;
@@ -113,7 +119,6 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
   compiler.options.module.rules
     .filter((r) => r.use && r.use.loader === 'bdf2fnt-loader')
     .forEach((r) => Object.assign(r.use.options, { charset }));
-
   if (dev) {
     if (charset !== dev.charset) {
       dev.charset = charset;
@@ -131,12 +136,7 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
   }
 }));
 
-hexo.extend.helper.register('entrypoints', () => entrypoints);
-hexo.extend.helper.register('content', (indent) => beautify(stringify({
-  posts: hexo.locals.get('posts').sort('-date').map((post) => ({
-    path: urlFor(post.path), cover: post.cover, photos: post.photos,
-  })),
-}), { indent_size: 2, indent_level: indent }).trim());
+hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
 
 hexo.extend.filter.register('server_middleware', (app) => {
   options.mode = 'development';

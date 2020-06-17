@@ -8,9 +8,9 @@
 <body>
 <%- body -%>
   <script>
-var cruzdanilo = Object.freeze(<%- content() -%>);
+var cruzdanilo = Object.freeze(<%- content -%>);
   </script>
-<%_ entrypoints().forEach((src) => { _%>
+<%_ entrypoints.forEach((src) => { _%>
   <script defer src="<%= src %>"></script>
 <%_ }) _%>
 </body>
