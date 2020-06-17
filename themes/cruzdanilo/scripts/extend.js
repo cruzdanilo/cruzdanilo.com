@@ -1,8 +1,9 @@
 require('dotenv').config();
 const { stringify } = require('json5');
+const { createHash } = require('crypto');
 const { js: beautify } = require('js-beautify');
 const { Volume, createFsFromVolume } = require('memfs');
-const { createSha1Hash, stripHTML, url_for: unboundUrlFor } = require('hexo-util');
+const { stripHTML, url_for: unboundUrlFor } = require('hexo-util');
 const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -12,6 +13,8 @@ const webpackHotMiddleware = require('webpack-hot-middleware');
 const path = require('path');
 
 const urlFor = unboundUrlFor.bind(hexo);
+const hash = (buffer) => createHash('md4').update(buffer).digest().toString('hex')
+  .substring(0, 8);
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
 const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
@@ -112,12 +115,21 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
     const { assets, entrypoints: eps } = stats.compilation;
     entrypoints = [...eps.values()].flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
     return resolve(await Promise.all(Object.keys(assets).map((k) => new Promise((resolveFile) => {
-      compiler.outputFileSystem.readFile(path.join(compiler.outputPath, k),
+      compiler.outputFileSystem.readFile(path.resolve(compiler.outputPath, k),
         (err, data) => resolveFile({ path: k, data: err ? null : data }));
     }))));
   }
 
   if (!compiler) buildCompiler();
+  const revision = hash(new Date().toISOString());
+  const PostAsset = hexo.model('PostAsset');
+  Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
+    additionalManifestEntries: [
+      'index.html',
+      ...locals.posts.map(({ _id: post, photos }) => photos
+        .map((slug) => PostAsset.findOne({ post, slug }).path)).flat(),
+    ].map((url) => ({ url: path.resolve(hexo.config.root, url), revision })),
+  });
   if (dev) {
     if (charset !== bdfLoader.options.charset) {
       bdfLoader.options.charset = charset;
@@ -158,15 +170,15 @@ hexo.extend.filter.register('server_middleware', (app) => {
       .filter((route) => !dev.context.stats.compilation.assets[route])
       .filter((route) => hexo.route.isModified(route))
       .map(async (route) => {
-        const hash = await new Promise((resolve, reject) => {
-          const sha1 = createSha1Hash();
-          hexo.route.get(route).pipe(sha1)
+        const newHash = await new Promise((resolve, reject) => {
+          const hsh = createHash('md4');
+          hexo.route.get(route).pipe(hsh)
             .on('error', reject)
-            .on('finish', () => resolve(sha1.read().toString('hex')));
+            .on('finish', () => resolve(hsh.read().toString('hex')));
         });
         const lastHash = hashes.get(route);
-        hashes.set(route, hash);
-        return !!lastHash && lastHash !== hash;
+        hashes.set(route, newHash);
+        return !!lastHash && lastHash !== newHash;
       }))).find(Boolean);
     if (reload) hot.publish({ action: 'reload' });
   });
