@@ -14,6 +14,7 @@ const path = require('path');
 const urlFor = unboundUrlFor.bind(hexo);
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
+const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
 const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
 const fileLoader = {
   loader: 'file-loader',
@@ -41,7 +42,7 @@ const options = {
     rules: [
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
       { test: /\/assets\/.*\.json$/, type: 'javascript/auto', use: fileLoader },
-      { test: /\.bdf.cast5$/, use: [{ loader: 'bdf2fnt-loader', options: { outputPath } }, decryptionLoader] },
+      { test: /\.bdf.cast5$/, use: [bdfLoader, decryptionLoader] },
       {
         test: /\.png.cast5$/,
         oneOf: [{
@@ -96,6 +97,16 @@ function buildCompiler() {
 }
 
 hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, reject) => {
+  content = beautify(stringify({
+    posts: locals.posts.sort('-date').map((post) => ({
+      path: urlFor(post.path), cover: post.cover, photos: post.photos,
+    })),
+  }), { indent_size: 2 }).trim();
+  const charset = [...locals.posts.reduce((set, post) => {
+    Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
+    return set;
+  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
+
   async function cruzdanilo(stats) {
     if (stats.hasErrors()) return reject(stats.errors);
     const { assets, entrypoints: eps } = stats.compilation;
@@ -107,21 +118,9 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
   }
 
   if (!compiler) buildCompiler();
-  content = beautify(stringify({
-    posts: locals.posts.sort('-date').map((post) => ({
-      path: urlFor(post.path), cover: post.cover, photos: post.photos,
-    })),
-  }), { indent_size: 2 }).trim();
-  const charset = [...locals.posts.reduce((set, post) => {
-    Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
-    return set;
-  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
-  compiler.options.module.rules
-    .filter((r) => r.use && r.use.loader === 'bdf2fnt-loader')
-    .forEach((r) => Object.assign(r.use.options, { charset }));
   if (dev) {
-    if (charset !== dev.charset) {
-      dev.charset = charset;
+    if (charset !== bdfLoader.options.charset) {
+      bdfLoader.options.charset = charset;
       dev.invalidate(cruzdanilo);
     } else dev.waitUntilValid(cruzdanilo);
   } else {
