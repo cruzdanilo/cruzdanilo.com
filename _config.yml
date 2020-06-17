@@ -3,12 +3,13 @@ title: danilo neves cruz
 subtitle: game developer
 description: i'm a computer scientist and i've been developing games and interactive digital content for more than 10 years. this is my portfolio.
 author: danilo neves cruz
-language: en
 url: https://cruzdanilo.com
 permalink: :title/
 theme: cruzdanilo
-post_asset_folder: true
 per_page: 0
+post_asset_folder: true
+pretty_urls:
+  trailing_index: false
 
 ## https://github.com/hexojs/hexo-filter-responsive-images
 responsive_images:
