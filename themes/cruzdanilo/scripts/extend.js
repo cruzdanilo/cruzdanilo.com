@@ -30,7 +30,7 @@ const options = {
   context,
   mode: 'production',
   entry: './main.js',
-  output: { filename: '[name].[contenthash:8].js', path: context },
+  output: { filename: '[name].[contenthash:8].js', path: context, publicPath: hexo.config.root },
   infrastructureLogging: { level: 'none' },
   stats: { colors: true, maxModules: Infinity },
   performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
