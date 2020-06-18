@@ -2,6 +2,8 @@ require('dotenv').config();
 const { stringify } = require('json5');
 const { createHash } = require('crypto');
 const { js: beautify } = require('js-beautify');
+const { cyan, magenta } = require('chalk');
+const { interpolateName } = require('loader-utils');
 const { Volume, createFsFromVolume } = require('memfs');
 const { stripHTML, url_for: unboundUrlFor } = require('hexo-util');
 const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
@@ -10,11 +12,20 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const filesize = require('filesize');
+const imagemin = require('imagemin').buffer;
+const mozjpeg = require('imagemin-mozjpeg');
+const optipng = require('imagemin-optipng');
 const path = require('path');
+const {
+  createReadStream, exists, readFile, writeFile,
+} = require('hexo-fs');
 
 const urlFor = unboundUrlFor.bind(hexo);
-const hash = (buffer) => createHash('md4').update(buffer).digest().toString('hex')
-  .substring(0, 8);
+const assetsPath = path.resolve('.assets');
+const hashFormat = '[contenthash:8]';
+const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
+const imageminPlugins = [mozjpeg(), optipng()];
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
 const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
@@ -26,7 +37,7 @@ const fileLoader = {
     name(resource) {
       const original = path.basename(resource, '.cast5');
       const ext = path.extname(original);
-      return `${path.basename(original, ext)}.[contenthash:8]${ext}`;
+      return `${path.basename(original, ext)}.${hashFormat}${ext}`;
     },
   },
 };
@@ -84,7 +95,6 @@ const options = {
     }),
   ],
 };
-const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 
 let compiler;
 let content;
@@ -99,7 +109,30 @@ function buildCompiler() {
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
 }
 
-hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, reject) => {
+hexo.extend.generator.register('asset', async (locals) => {
+  const assets = (await Promise.all(hexo.model('PostAsset').map(async (asset) => {
+    if (!await exists(asset.source)) {
+      asset.remove();
+      return [];
+    }
+    const source = path.resolve(assetsPath, asset.path);
+    let data;
+    if (asset.modified || !await exists(source)) {
+      const buffer = await readFile(asset.source, { encoding: null, escape: false });
+      data = await imagemin(buffer, { plugins: imageminPlugins });
+      hexo.log.info('[imagemin]', filesize(buffer.length).padStart(9), '=>',
+        filesize(data.length).padStart(9),
+        cyan(`-${(1 - (data.length / buffer.length))
+          .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
+        magenta(asset.path));
+      await writeFile(source, data);
+    } else data = await readFile(source, { encoding: null, escape: false });
+    const { dir, name, ext } = path.parse(asset.path);
+    return {
+      path: path.join(dir, interpolateName({}, `${name}.${hashFormat}${ext}`, { content: data })),
+      data: () => createReadStream(source),
+    };
+  }))).flat();
   content = beautify(stringify({
     posts: locals.posts.sort('-date').map((post) => ({
       path: urlFor(post.path), cover: post.cover, photos: post.photos,
@@ -110,42 +143,40 @@ hexo.extend.generator.register('cruzdanilo', (locals) => new Promise((resolve, r
     return set;
   }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
 
-  async function cruzdanilo(stats) {
-    if (stats.hasErrors()) return reject(stats.errors);
-    const { assets, entrypoints: eps } = stats.compilation;
-    entrypoints = [...eps.values()].flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
-    return resolve(await Promise.all(Object.keys(assets).map((k) => new Promise((resolveFile) => {
-      compiler.outputFileSystem.readFile(path.resolve(compiler.outputPath, k),
-        (err, data) => resolveFile({ path: k, data: err ? null : data }));
-    }))));
-  }
-
   if (!compiler) buildCompiler();
-  const revision = hash(new Date().toISOString());
-  const PostAsset = hexo.model('PostAsset');
+  const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
-      'index.html',
-      ...locals.posts.map(({ _id: post, photos }) => photos
-        .map((slug) => PostAsset.findOne({ post, slug }).path)).flat(),
-    ].map((url) => ({ url: path.resolve(hexo.config.root, url), revision })),
+      { url: path.resolve(hexo.config.root, 'index.html'), revision },
+      ...assets.map((asset) => ({ url: urlFor(asset.path), revision: null })),
+    ],
   });
-  if (dev) {
-    if (charset !== bdfLoader.options.charset) {
-      bdfLoader.options.charset = charset;
-      dev.invalidate(cruzdanilo);
-    } else dev.waitUntilValid(cruzdanilo);
-  } else {
-    compiler.run(async (err, stats) => {
-      if (err) reject(err);
-      else {
-        stats.toString(options.stats).split('\n')
-          .forEach((line) => hexo.log[stats.hasErrors() ? 'error' : 'info']('[cruzdanilo]', line));
-        await cruzdanilo(stats);
-      }
-    });
-  }
-}));
+  const stats = await new Promise((resolve, reject) => {
+    if (dev) {
+      if (charset !== bdfLoader.options.charset) {
+        bdfLoader.options.charset = charset;
+        dev.invalidate(resolve);
+      } else dev.waitUntilValid(resolve);
+    } else {
+      compiler.run((error, result) => {
+        if (error) return reject(error);
+        const log = hexo.log[result.hasErrors() ? 'error' : 'info'].bind(hexo.log);
+        result.toString(compiler.options.stats).split('\n').forEach((l) => log('[webpack]', l));
+        return resolve(result);
+      });
+    }
+  });
+  if (stats.hasErrors()) throw new Error(stats.errors);
+  entrypoints = [...stats.compilation.entrypoints.values()]
+    .flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
+  return [
+    ...assets,
+    ...Object.keys(stats.compilation.assets).map((f) => ({
+      path: f,
+      data: () => compiler.outputFileSystem.createReadStream(path.resolve(compiler.outputPath, f)),
+    })),
+  ];
+});
 
 hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
 

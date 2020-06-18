@@ -1,3 +1,4 @@
+.assets/
 .deploy*/
 node_modules/
 public/
