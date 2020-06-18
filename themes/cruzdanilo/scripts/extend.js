@@ -22,7 +22,7 @@ const {
 } = require('hexo-fs');
 
 const urlFor = unboundUrlFor.bind(hexo);
-const assetsPath = path.resolve('.assets');
+const cachePath = path.resolve('.cache');
 const hashFormat = '[contenthash:8]';
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 const imageminPlugins = [mozjpeg(), optipng()];
@@ -115,7 +115,7 @@ hexo.extend.generator.register('asset', async (locals) => {
       asset.remove();
       return [];
     }
-    const source = path.resolve(assetsPath, asset.path);
+    const source = path.resolve(cachePath, asset.path);
     let data;
     if (asset.modified || !await exists(source)) {
       const buffer = await readFile(asset.source, { encoding: null, escape: false });
