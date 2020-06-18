@@ -5,7 +5,7 @@ import { NavigationRoute, registerRoute } from 'workbox-routing';
 
 skipWaiting();
 clientsClaim();
-precacheAndRoute(self.__WB_MANIFEST); // eslint-disable-line no-underscore-dangle
+precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')));
 initialize();
