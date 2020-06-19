@@ -1,9 +1,9 @@
 require('dotenv').config();
-const { stringify } = require('json5');
 const { createHash } = require('crypto');
 const { js: beautify } = require('js-beautify');
 const { cyan, magenta } = require('chalk');
 const { interpolateName } = require('loader-utils');
+const { parse, stringify } = require('json5');
 const { Volume, createFsFromVolume } = require('memfs');
 const { stripHTML, url_for: unboundUrlFor } = require('hexo-util');
 const { webpack, DefinePlugin, HotModuleReplacementPlugin } = require('webpack');
@@ -111,26 +111,37 @@ function buildCompiler() {
 }
 
 hexo.extend.generator.register('asset', async (locals) => {
+  const Cache = hexo.model('Cache');
   const assets = (await Promise.all(hexo.model('PostAsset').map(async (asset) => {
     if (!await exists(asset.source)) {
       asset.remove();
       return [];
     }
+    const { hash } = Cache.findById(asset._id);
+    const { dir, name, ext } = path.parse(asset.path);
     const source = path.resolve(cachePath, asset.path);
-    let data;
-    if (asset.modified || !await exists(source)) {
+    const metaSource = `${source}.json5`;
+    let optimizedName;
+    try {
+      const meta = parse(await readFile(metaSource));
+      if (meta.hash !== hash) throw new Error('invalid cache');
+      optimizedName = meta.optimizedName;
+    } catch {
       const buffer = await readFile(asset.source, { encoding: null, escape: false });
-      data = await imagemin(buffer, { plugins: imageminPlugins });
+      const data = await imagemin(buffer, { plugins: imageminPlugins });
       hexo.log.info('[imagemin]', filesize(buffer.length).padStart(9), '=>',
         filesize(data.length).padStart(9),
         cyan(`-${(1 - (data.length / buffer.length))
           .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
         magenta(asset.path));
-      await writeFile(source, data);
-    } else data = await readFile(source, { encoding: null, escape: false });
-    const { dir, name, ext } = path.parse(asset.path);
+      optimizedName = interpolateName({}, `${name}.${hashFormat}${ext}`, { content: data });
+      await Promise.all([
+        writeFile(source, data),
+        writeFile(metaSource, stringify({ optimizedName, hash }, null, 2)),
+      ]);
+    }
     return {
-      path: path.join(dir, interpolateName({}, `${name}.${hashFormat}${ext}`, { content: data })),
+      path: path.join(dir, optimizedName),
       data: () => createReadStream(source),
     };
   }))).flat();
