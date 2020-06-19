@@ -16,6 +16,7 @@ const filesize = require('filesize');
 const imagemin = require('imagemin').buffer;
 const mozjpeg = require('imagemin-mozjpeg');
 const optipng = require('imagemin-optipng');
+const sharp = require('sharp');
 const path = require('path');
 const {
   createReadStream, exists, readFile, writeFile,
@@ -118,43 +119,37 @@ hexo.extend.generator.register('asset', async (locals) => {
       return [];
     }
     const { hash } = Cache.findById(asset._id);
-    const { dir, name, ext } = path.parse(asset.path);
+    const { dir, name } = path.parse(asset.path);
     const source = path.resolve(cachePath, asset.path);
     const metaSource = `${source}.json5`;
-    let optimizedName;
+    let optimizedPath;
     try {
       const meta = parse(await readFile(metaSource));
       if (meta.hash !== hash) throw new Error('invalid cache');
-      optimizedName = meta.optimizedName;
+      optimizedPath = meta.optimizedPath;
     } catch {
       const buffer = await readFile(asset.source, { encoding: null, escape: false });
-      const data = await imagemin(buffer, { plugins: imageminPlugins });
-      hexo.log.info('[imagemin]', filesize(buffer.length).padStart(9), '=>',
+      const data = await imagemin(
+        await sharp(buffer).resize({ width: 1600, withoutEnlargement: true }).jpeg().toBuffer(),
+        { plugins: imageminPlugins },
+      );
+      hexo.log.info('[optimize]', filesize(buffer.length).padStart(9), '=>',
         filesize(data.length).padStart(9),
         cyan(`-${(1 - (data.length / buffer.length))
           .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
         magenta(asset.path));
-      optimizedName = interpolateName({}, `${name}.${hashFormat}${ext}`, { content: data });
+      optimizedPath = interpolateName({}, `${dir}/${name}.${hashFormat}.jpg`, { content: data });
       await Promise.all([
         writeFile(source, data),
-        writeFile(metaSource, stringify({ optimizedName, hash }, null, 2)),
+        writeFile(metaSource, stringify({ optimizedPath, hash }, null, 2)),
       ]);
     }
-    return {
-      path: path.join(dir, optimizedName),
-      data: () => createReadStream(source),
-    };
+    return { path: optimizedPath, data: () => createReadStream(source) };
   }))).flat();
-  content = beautify(stringify({
-    posts: locals.posts.sort('-date').map((post) => ({
-      path: urlFor(post.path), cover: post.cover, photos: post.photos,
-    })),
-  }), { indent_size: 2 }).trim();
   const charset = [...locals.posts.reduce((set, post) => {
     Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
     return set;
   }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
-
   if (!compiler) buildCompiler();
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
@@ -178,6 +173,11 @@ hexo.extend.generator.register('asset', async (locals) => {
     }
   });
   if (stats.hasErrors()) throw new Error(stats.errors);
+  content = beautify(stringify({
+    posts: locals.posts.sort('-date').map((post) => ({
+      path: urlFor(post.path), cover: post.cover, photos: post.photos,
+    })),
+  }), { indent_size: 2 }).trim();
   entrypoints = [...stats.compilation.entrypoints.values()]
     .flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
   return [
