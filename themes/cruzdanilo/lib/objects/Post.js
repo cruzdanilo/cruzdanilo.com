@@ -4,7 +4,7 @@ import Container from 'phaser/src/gameobjects/container/Container';
 import Image from 'phaser/src/gameobjects/image/Image';
 import Sprite from 'phaser/src/gameobjects/sprite/Sprite';
 
-import frame from '../assets/post-frame.png.cast5';
+import frame from '../assets/post-frame.png.enc';
 
 const FRAME_KEY = 'post-frame';
 
@@ -77,7 +77,7 @@ export default class Post extends Container {
   }
 
   hot() {
-    module.hot.accept('../assets/post-frame.png.cast5', () => {
+    module.hot.accept('../assets/post-frame.png.enc', () => {
       this.scene.cache.image.remove(FRAME_KEY);
       Post.loadFrame(this.scene);
       this.scene.reload(() => {

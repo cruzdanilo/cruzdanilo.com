@@ -8,8 +8,8 @@ import Scene from 'phaser/src/scene/Scene';
 import TilemapJSONFile from 'phaser/src/loader/filetypes/TilemapJSONFile';
 import COMPLETE_EVENT from 'phaser/src/loader/events/COMPLETE_EVENT';
 
-import dark from '../assets/dark.font.png.cast5';
-import ui from '../assets/ui.png.cast5';
+import dark from '../assets/dark.font.png.enc';
+import ui from '../assets/ui.png.enc';
 
 export const UI_HEIGHT = 80;
 
@@ -115,7 +115,7 @@ export default class Base extends Scene {
   }
 
   hot() {
-    module.hot.accept(['../assets/ui.png.cast5', '../assets/dark.font.png.cast5'],
+    module.hot.accept(['../assets/ui.png.enc', '../assets/dark.font.png.enc'],
       () => this.refreshUI());
   }
 }

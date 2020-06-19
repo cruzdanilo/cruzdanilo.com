@@ -35,7 +35,7 @@ const fileLoader = {
   options: {
     outputPath,
     name(resource) {
-      const original = path.basename(resource, '.cast5');
+      const original = path.basename(resource, '.enc');
       const ext = path.extname(original);
       return `${path.basename(original, ext)}.${hashFormat}${ext}`;
     },
@@ -56,9 +56,9 @@ const options = {
     rules: [
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
       { test: /\/assets\/.*\.json$/, type: 'javascript/auto', use: fileLoader },
-      { test: /\.bdf.cast5$/, use: [bdfLoader, decryptionLoader] },
+      { test: /\.bdf.enc$/, use: [bdfLoader, decryptionLoader] },
       {
-        test: /\.png.cast5$/,
+        test: /\.png.enc$/,
         oneOf: [{
           test: /\.font\./,
           use: ({ resource }) => [{
