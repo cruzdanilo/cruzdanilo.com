@@ -26,6 +26,7 @@ const cachePath = path.resolve('.cache');
 const hashFormat = '[contenthash:8]';
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 const imageminPlugins = [mozjpeg(), optipng()];
+const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
 const context = path.resolve(__dirname, '../lib');
 const outputPath = 'assets';
 const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
@@ -144,7 +145,6 @@ hexo.extend.generator.register('asset', async (locals) => {
   }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
 
   if (!compiler) buildCompiler();
-  const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
       { url: path.resolve(hexo.config.root, 'index.html'), revision },
