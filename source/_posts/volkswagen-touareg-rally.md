@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2008-06-23 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, volkswagen]
-cover: cover_photo02.jpg
+cover: photo02.jpg
 photos:
   - photo00.png
   - photo01.jpg

@@ -3,6 +3,7 @@ extends:
 globals:
   hexo: readonly
 rules:
+  func-names: off
   node/no-unpublished-require: off
   import/no-extraneous-dependencies:
     - error

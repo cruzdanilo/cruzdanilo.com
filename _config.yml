@@ -10,11 +10,6 @@ per_page: 0
 post_asset_folder: true
 pretty_urls:
   trailing_index: false
-
-# https://github.com/hexojs/hexo-filter-responsive-images
-responsive_images:
-  pattern: '*/*.+(png|jpg|jpeg)'
-  sizes:
-    cover:
-      width: 54 # 27
-      height: 82 # 41
+cover:
+  width: 54 # 27
+  height: 82 # 41

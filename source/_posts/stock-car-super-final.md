@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2013-01-01 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, rede globo]
-cover: cover_photo12.jpg
+cover: photo12.jpg
 photos:
   - photo00.png
   - photo01.jpg

@@ -13,9 +13,7 @@ const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const filesize = require('filesize');
-const imagemin = require('imagemin').buffer;
-const mozjpeg = require('imagemin-mozjpeg');
-const optipng = require('imagemin-optipng');
+const optipng = require('imagemin-optipng')();
 const sharp = require('sharp');
 const path = require('path');
 const {
@@ -23,13 +21,12 @@ const {
 } = require('hexo-fs');
 
 const urlFor = unboundUrlFor.bind(hexo);
-const cachePath = path.resolve('.cache');
+const cachePath = '.cache';
 const hashFormat = '[contenthash:8]';
 const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
-const imageminPlugins = [mozjpeg(), optipng()];
 const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
 const context = path.resolve(__dirname, '../lib');
-const outputPath = 'assets';
+const outputPath = '_assets';
 const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
 const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
 const fileLoader = {
@@ -112,44 +109,71 @@ function buildCompiler() {
 }
 
 hexo.extend.generator.register('asset', async (locals) => {
+  const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
-  const assets = (await Promise.all(hexo.model('PostAsset').map(async (asset) => {
-    if (!await exists(asset.source)) {
-      asset.remove();
-      return [];
+  const Asset = hexo.model('Asset');
+  const PostAsset = hexo.model('PostAsset');
+  const assets = (await Promise.all([
+    ...PostAsset.toArray(), ...Asset.toArray(),
+  ].map(async (asset) => {
+    if (!await exists(asset.source)) { asset.remove(); return []; }
+    const assetPath = asset.path;
+    const { dir, name, ext } = path.parse(assetPath);
+    if (!['.png', '.jpg', '.jpeg'].includes(ext)) {
+      return { path: assetPath, data: () => createReadStream(asset.source) };
     }
     const { hash } = Cache.findById(asset._id);
-    const { dir, name } = path.parse(asset.path);
-    const source = path.resolve(cachePath, asset.path);
-    const metaSource = `${source}.json5`;
-    let optimizedPath;
+    const sourceMeta = path.join(cachePath, `${assetPath}.json5`);
+    let output;
     try {
-      const meta = parse(await readFile(metaSource));
-      if (meta.hash !== hash) throw new Error('invalid cache');
-      optimizedPath = meta.optimizedPath;
+      const meta = parse(await readFile(sourceMeta));
+      if (hash !== meta.hash) throw new Error('invalid cache');
+      output = meta.output;
     } catch {
       const buffer = await readFile(asset.source, { encoding: null, escape: false });
-      const data = await imagemin(
-        await sharp(buffer).resize({ width: 1600, withoutEnlargement: true }).jpeg().toBuffer(),
-        { plugins: imageminPlugins },
-      );
-      hexo.log.info('[optimize]', filesize(buffer.length).padStart(9), '=>',
-        filesize(data.length).padStart(9),
-        cyan(`-${(1 - (data.length / buffer.length))
-          .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
-        magenta(asset.path));
-      optimizedPath = interpolateName({}, `${dir}/${name}.${hashFormat}.jpg`, { content: data });
-      await Promise.all([
-        writeFile(source, data),
-        writeFile(metaSource, stringify({ optimizedPath, hash }, null, 2)),
-      ]);
+      output = Object.fromEntries(await Promise.all([
+        ['optslug', `.${hashFormat}.jpg`, (b) => b, sharp(buffer)
+          .resize({ width: 1600, withoutEnlargement: true })
+          .jpeg({
+            quality: 75,
+            trellisQuantization: true,
+            overshootDeringing: true,
+            optimizeScans: true,
+            quantizationTable: 3,
+          })],
+        ['webp', `.webp.${hashFormat}.webp`, (b) => b, sharp(buffer)
+          .resize({ width: 1600, withoutEnlargement: true })
+          .webp({ quality: 75, reductionEffort: 6, smartSubsample: true })],
+        ...asset.post && Post.findById(asset.post).cover === asset.slug ? [
+          ['cover', `.cover.${hashFormat}.png`, optipng, sharp(buffer)
+            .resize(hexo.config.cover)
+            .png({ compressionLevel: 0 })],
+        ] : [],
+      ].map(async ([key, suffix, optimizer, pipeline]) => {
+        const data = await optimizer(await pipeline.toBuffer());
+        const optname = interpolateName({}, `${name}${suffix}`, { content: data });
+        const optpath = path.join(dir, optname);
+        hexo.log.info('[optimize]', filesize(buffer.length).padStart(9), '=>',
+          filesize(data.length).padStart(9),
+          cyan(`-${(1 - (data.length / buffer.length))
+            .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
+          magenta(optpath));
+        await writeFile(path.join(cachePath, optpath), data);
+        return [key, optname];
+      })));
+      await writeFile(sourceMeta, stringify({ hash, output }, null, 2));
     }
-    return { path: optimizedPath, data: () => createReadStream(source) };
+    await asset.update({ ...output, ...!asset.post && { path: output.optslug } });
+    return Object.values(output).map((slug) => ({
+      path: path.join(dir, slug),
+      data: () => createReadStream(path.join(cachePath, dir, slug)),
+    }));
   }))).flat();
-  const charset = [...locals.posts.reduce((set, post) => {
-    Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
-    return set;
-  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
+  PostAsset.schema.virtual('path').get(function () {
+    return path.join(Post.findById(this.post).path, this.optslug || this.slug);
+  });
+  PostAsset.schema.virtual('source').get(function () { return path.join(cachePath, this.path); });
+
   if (!compiler) buildCompiler();
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
@@ -157,6 +181,10 @@ hexo.extend.generator.register('asset', async (locals) => {
       ...assets.map((asset) => ({ url: urlFor(asset.path), revision: null })),
     ],
   });
+  const charset = [...locals.posts.reduce((set, post) => {
+    Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
+    return set;
+  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
   const stats = await new Promise((resolve, reject) => {
     if (dev) {
       if (charset !== bdfLoader.options.charset) {
@@ -173,9 +201,12 @@ hexo.extend.generator.register('asset', async (locals) => {
     }
   });
   if (stats.hasErrors()) throw new Error(stats.errors);
+
   content = beautify(stringify({
     posts: locals.posts.sort('-date').map((post) => ({
-      path: urlFor(post.path), cover: post.cover, photos: post.photos,
+      path: urlFor(post.path),
+      cover: PostAsset.findOne({ post: post._id, slug: post.cover }).cover,
+      photos: post.photos.map((slug) => PostAsset.findOne({ post: post._id, slug }).optslug),
     })),
   }), { indent_size: 2 }).trim();
   entrypoints = [...stats.compilation.entrypoints.values()]

@@ -4,7 +4,7 @@ subtitle: 3d web site/widget
 date: 2009-04-01 00:00:00
 categories: augmented reality
 tags: [augmented reality, 3d, web, social network, flash, papervision3d, actionscript, doritos]
-cover: cover_photo07.png
+cover: photo07.png
 photos:
   - photo00.jpg
   - photo01.jpg

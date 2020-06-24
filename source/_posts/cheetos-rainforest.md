@@ -4,7 +4,7 @@ subtitle: 3d platformer game
 date: 2011-01-01 00:00:00
 categories: games
 tags: [game, advergame, 3d, platformer, unity, web, c sharp, cheetos]
-cover: cover_photo00.jpg
+cover: photo00.jpg
 photos:
   - photo00.jpg
   - photo01.jpg

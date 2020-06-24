@@ -4,7 +4,7 @@ subtitle: 3d first person shooter game
 date: 2010-05-01 00:00:00
 categories: games
 tags: [game, advergame, 3d, fps, unity, web, c sharp, rexona]
-cover: cover_photo00.jpg
+cover: photo00.jpg
 photos:
   - photo00.jpg
   - photo07.jpg

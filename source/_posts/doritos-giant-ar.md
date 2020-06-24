@@ -4,7 +4,7 @@ subtitle: 3d augmented reality
 date: 2010-03-01 00:00:00
 categories: augmented reality
 tags: [augmented reality, 3d, flash, papervision3d, actionscript, doritos]
-cover: cover_photo00.jpg
+cover: photo00.jpg
 photos:
   - photo00.jpg
   - photo01.jpg

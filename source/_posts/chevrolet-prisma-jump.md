@@ -4,7 +4,7 @@ subtitle: 3d racing game
 date: 2008-06-15 00:00:00
 categories: games
 tags: [game, advergame, 3d, racing, unity, web, c sharp, chevrolet]
-cover: cover_photo00.jpg
+cover: photo00.jpg
 photos:
   - photo00.jpg
   - photo01.jpg
