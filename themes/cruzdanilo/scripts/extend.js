@@ -23,107 +23,143 @@ const {
 const urlFor = unboundUrlFor.bind(hexo);
 const cachePath = '.cache';
 const hashFormat = '[contenthash:8]';
-const baseCharset = ' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789';
 const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
-const context = path.resolve(__dirname, '../lib');
-const outputPath = '_assets';
-const bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
-const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
-const fileLoader = {
-  loader: 'file-loader',
-  options: {
-    outputPath,
-    name(resource) {
-      const original = path.basename(resource, '.enc');
-      const ext = path.extname(original);
-      return `${path.basename(original, ext)}.${hashFormat}${ext}`;
-    },
-  },
-};
-const options = {
-  context,
-  mode: 'production',
-  entry: './main.js',
-  output: { filename: '[name].[contenthash:8].js', path: context, publicPath: hexo.config.root },
-  infrastructureLogging: { level: 'none' },
-  stats: { colors: true, maxModules: Infinity },
-  performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
-  optimization: {
-    minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
-  },
-  module: {
-    rules: [
-      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
-      { test: /\/assets\/.*\.json$/, type: 'javascript/auto', use: fileLoader },
-      { test: /\.bdf.enc$/, use: [bdfLoader, decryptionLoader] },
-      {
-        test: /\.png.enc$/,
-        oneOf: [{
-          test: /\.font\./,
-          use: ({ resource }) => [{
-            loader: 'png2fnt-loader',
-            options: {
-              ...fileLoader.options,
-              ...{
-                dark: { ignoreColumns: [123], chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+/\\' },
-              }[path.basename(resource.substring(0, resource.indexOf('.font')))],
-            },
-          }, decryptionLoader],
-        }, { use: [fileLoader, decryptionLoader] }],
-      },
-    ],
-  },
-  plugins: [
-    new DefinePlugin({
-      'typeof CANVAS_RENDERER': JSON.stringify(true),
-      'typeof WEBGL_RENDERER': JSON.stringify(true),
-      'typeof EXPERIMENTAL': JSON.stringify(false),
-      'typeof PLUGIN_CAMERA3D': JSON.stringify(false),
-      'typeof PLUGIN_FBINSTANT': JSON.stringify(false),
-      'typeof FEATURE_SOUND': JSON.stringify(false),
-    }),
-    new BundleAnalyzerPlugin({
-      logLevel: 'silent',
-      openAnalyzer: false,
-      analyzerMode: 'static',
-      reportFilename: path.resolve(__dirname, '../../../report.html'),
-    }),
-    new InjectManifest({
-      swSrc: path.resolve(__dirname, '../lib/serviceWorker.js'),
-      dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
-    }),
-  ],
-};
 
 let compiler;
+let server;
+let wdm;
+let bdfLoader;
 let content;
 let entrypoints;
-let dev;
 
-function buildCompiler() {
-  compiler = webpack(options);
+const buildCompiler = (dev = !!server) => {
+  const context = path.resolve(__dirname, '../lib');
+  const outputPath = '_assets';
+  bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
+  const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
+  const fileLoader = {
+    loader: 'file-loader',
+    options: {
+      outputPath,
+      name(resource) {
+        const original = path.basename(resource, '.enc');
+        const ext = path.extname(original);
+        return `${path.basename(original, ext)}.${hashFormat}${ext}`;
+      },
+    },
+  };
+  compiler = webpack({
+    context,
+    mode: dev ? 'development' : 'production',
+    devtool: dev && 'eval-source-map',
+    entry: ['./main.js', ...dev ? ['./hmrClient'] : []],
+    output: {
+      filename: dev ? '[name].js' : '[name].[contenthash:8].js',
+      path: context,
+      publicPath: hexo.config.root,
+    },
+    infrastructureLogging: { level: 'none' },
+    stats: { colors: true, maxModules: Infinity },
+    performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
+    optimization: {
+      minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
+    },
+    module: {
+      rules: [
+        { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+        { test: /\/assets\/.*\.json$/, type: 'javascript/auto', use: fileLoader },
+        { test: /\.bdf.enc$/, use: [bdfLoader, decryptionLoader] },
+        {
+          test: /\.png.enc$/,
+          oneOf: [{
+            test: /\.font\./,
+            use: ({ resource }) => [{
+              loader: 'png2fnt-loader',
+              options: {
+                ...fileLoader.options,
+                ...{
+                  dark: { ignoreColumns: [123], chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+/\\' },
+                }[path.basename(resource.substring(0, resource.indexOf('.font')))],
+              },
+            }, decryptionLoader],
+          }, { use: [fileLoader, decryptionLoader] }],
+        },
+      ],
+    },
+    plugins: [
+      new DefinePlugin({
+        'typeof CANVAS_RENDERER': JSON.stringify(true),
+        'typeof WEBGL_RENDERER': JSON.stringify(true),
+        'typeof EXPERIMENTAL': JSON.stringify(false),
+        'typeof PLUGIN_CAMERA3D': JSON.stringify(false),
+        'typeof PLUGIN_FBINSTANT': JSON.stringify(false),
+        'typeof FEATURE_SOUND': JSON.stringify(false),
+      }),
+      new BundleAnalyzerPlugin({
+        logLevel: 'silent',
+        openAnalyzer: false,
+        analyzerMode: 'static',
+        reportFilename: path.resolve(__dirname, '../../../report.html'),
+      }),
+      new InjectManifest({
+        swSrc: path.resolve(__dirname, '../lib/serviceWorker.js'),
+        dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
+        ...dev && { exclude: [/.*/] },
+      }),
+      ...dev ? [new HotModuleReplacementPlugin()] : [],
+    ],
+  });
   compiler.outputFileSystem = createFsFromVolume(new Volume());
   compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
     .forEach((arg) => arg.split('\n')
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
-}
+  if (!server) return;
+  wdm = webpackDevMiddleware(compiler);
+  server.use(wdm);
+  const hot = webpackHotMiddleware(compiler, {
+    path: '/webpack.hmr',
+    log: (...args) => args.forEach((a) => a.split('\n').forEach((l) => hexo.log.info('[whm]', l))),
+  });
+  server.use(hot);
+  const hashes = new Map();
+  hexo.on('generateAfter', async () => {
+    const reload = (await Promise.all(hexo.route.list()
+      .filter((route) => !wdm.context.stats.compilation.assets[route])
+      .filter((route) => hexo.route.isModified(route))
+      .map(async (route) => {
+        const newHash = await new Promise((resolve, reject) => {
+          const hsh = createHash('md4');
+          hexo.route.get(route).pipe(hsh)
+            .on('error', reject)
+            .on('finish', () => resolve(hsh.read().toString('hex')));
+        });
+        const lastHash = hashes.get(route);
+        hashes.set(route, newHash);
+        return !!lastHash && lastHash !== newHash;
+      }))).find(Boolean);
+    if (reload) hot.publish({ action: 'reload' });
+  });
+};
 
+hexo.model('PostAsset').schema.virtual('path').get(function () {
+  return path.join(hexo.model('Post').findById(this.post).path, this.optslug || this.slug);
+});
+hexo.extend.filter.register('server_middleware', (app) => { server = app; });
+hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
 hexo.extend.generator.register('asset', async (locals) => {
   const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
-  const Asset = hexo.model('Asset');
   const PostAsset = hexo.model('PostAsset');
   const assets = (await Promise.all([
-    ...PostAsset.toArray(), ...Asset.toArray(),
+    ...PostAsset.toArray(), ...hexo.model('Asset').toArray(),
   ].map(async (asset) => {
     if (!await exists(asset.source)) { asset.remove(); return []; }
-    const assetPath = asset.path;
-    const { dir, name, ext } = path.parse(assetPath);
-    if (!['.png', '.jpg', '.jpeg'].includes(ext)) {
-      return { path: assetPath, data: () => createReadStream(asset.source) };
-    }
+    const original = asset.original || asset.path;
+    const { dir, name, ext } = path.parse(original);
+    if (!['.png', '.jpg', '.jpeg']
+      .includes(ext)) return { path: original, data: () => createReadStream(asset.source) };
     const { hash } = Cache.findById(asset._id);
-    const sourceMeta = path.join(cachePath, `${assetPath}.json5`);
+    const sourceMeta = path.join(cachePath, `${original}.json5`);
     let output;
     try {
       const meta = parse(await readFile(sourceMeta));
@@ -141,13 +177,16 @@ hexo.extend.generator.register('asset', async (locals) => {
             optimizeScans: true,
             quantizationTable: 3,
           })],
-        ['webp', `.webp.${hashFormat}.webp`, (b) => b, sharp(buffer)
+        ['webp', `.${hashFormat}.webp`, (b) => b, sharp(buffer)
           .resize({ width: 1600, withoutEnlargement: true })
           .webp({ quality: 75, reductionEffort: 6, smartSubsample: true })],
         ...asset.post && Post.findById(asset.post).cover === asset.slug ? [
           ['cover', `.cover.${hashFormat}.png`, optipng, sharp(buffer)
             .resize(hexo.config.cover)
             .png({ compressionLevel: 0 })],
+          ['cover_webp', `.cover.${hashFormat}.webp`, (b) => b, sharp(buffer)
+            .resize(hexo.config.cover)
+            .webp({ quality: 75, reductionEffort: 6, smartSubsample: true })],
         ] : [],
       ].map(async ([key, suffix, optimizer, pipeline]) => {
         const data = await optimizer(await pipeline.toBuffer());
@@ -163,16 +202,12 @@ hexo.extend.generator.register('asset', async (locals) => {
       })));
       await writeFile(sourceMeta, stringify({ hash, output }, null, 2));
     }
-    await asset.update({ ...output, ...!asset.post && { path: output.optslug } });
+    await asset.update({ original, ...output, ...!asset.post && { path: output.optslug } });
     return Object.values(output).map((slug) => ({
       path: path.join(dir, slug),
       data: () => createReadStream(path.join(cachePath, dir, slug)),
     }));
   }))).flat();
-  PostAsset.schema.virtual('path').get(function () {
-    return path.join(Post.findById(this.post).path, this.optslug || this.slug);
-  });
-  PostAsset.schema.virtual('source').get(function () { return path.join(cachePath, this.path); });
 
   if (!compiler) buildCompiler();
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
@@ -184,13 +219,14 @@ hexo.extend.generator.register('asset', async (locals) => {
   const charset = [...locals.posts.reduce((set, post) => {
     Array.from(post.title + stripHTML(post.content)).forEach((c) => set.add(c));
     return set;
-  }, new Set(baseCharset))].filter((ch) => /[ \S]/.test(ch)).sort().join('');
+  }, new Set(' ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.0123456789'))]
+    .filter((ch) => /[ \S]/.test(ch)).sort().join('');
   const stats = await new Promise((resolve, reject) => {
-    if (dev) {
+    if (wdm) {
       if (charset !== bdfLoader.options.charset) {
         bdfLoader.options.charset = charset;
-        dev.invalidate(resolve);
-      } else dev.waitUntilValid(resolve);
+        wdm.invalidate(resolve);
+      } else wdm.waitUntilValid(resolve);
     } else {
       compiler.run((error, result) => {
         if (error) return reject(error);
@@ -218,41 +254,4 @@ hexo.extend.generator.register('asset', async (locals) => {
       data: () => compiler.outputFileSystem.createReadStream(path.resolve(compiler.outputPath, f)),
     })),
   ];
-});
-
-hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
-
-hexo.extend.filter.register('server_middleware', (app) => {
-  options.mode = 'development';
-  options.devtool = 'eval-source-map';
-  options.output.filename = '[name].js';
-  options.entry = [options.entry, './hmrClient'];
-  options.plugins.push(new HotModuleReplacementPlugin());
-  options.plugins.find((plugin) => plugin instanceof InjectManifest).config.exclude = [/.*/];
-  buildCompiler();
-  dev = webpackDevMiddleware(compiler);
-  app.use(dev);
-  const hot = webpackHotMiddleware(compiler, {
-    path: '/webpack.hmr',
-    log: (...args) => args.forEach((a) => a.split('\n').forEach((l) => hexo.log.info('[whm]', l))),
-  });
-  app.use(hot);
-  const hashes = new Map();
-  hexo.on('generateAfter', async () => {
-    const reload = (await Promise.all(hexo.route.list()
-      .filter((route) => !dev.context.stats.compilation.assets[route])
-      .filter((route) => hexo.route.isModified(route))
-      .map(async (route) => {
-        const newHash = await new Promise((resolve, reject) => {
-          const hsh = createHash('md4');
-          hexo.route.get(route).pipe(hsh)
-            .on('error', reject)
-            .on('finish', () => resolve(hsh.read().toString('hex')));
-        });
-        const lastHash = hashes.get(route);
-        hashes.set(route, newHash);
-        return !!lastHash && lastHash !== newHash;
-      }))).find(Boolean);
-    if (reload) hot.publish({ action: 'reload' });
-  });
 });
