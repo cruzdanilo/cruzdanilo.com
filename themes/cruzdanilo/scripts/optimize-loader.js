@@ -1,4 +1,4 @@
-const path = require('path').posix;
+const { join } = require('path').posix;
 const { getOptions, interpolateName } = require('loader-utils');
 const optipng = require('imagemin-optipng')();
 const sharp = require('sharp');
@@ -15,7 +15,7 @@ module.exports = async function loader(content) {
       ['.webp', (b) => b, sharp(content).webp({ quality: 100, lossless: true, reductionEffort: 6 })],
     ].map(async ([ext, optimizer, pipeline]) => {
       const data = await optimizer(await pipeline.toBuffer());
-      const filepath = path.join(outputPath, interpolateName({
+      const filepath = join(outputPath, interpolateName({
         ...this, resourcePath: this.resourcePath.replace(/\.png(?!.*\.png)/, ext),
       }, name, { content: data }));
       this.emitFile(filepath, data);
