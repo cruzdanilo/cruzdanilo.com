@@ -53,6 +53,7 @@ const buildCompiler = (dev = !!server) => {
     context,
     mode: dev ? 'development' : 'production',
     devtool: dev && 'eval-source-map',
+    resolve: { symlinks: !dev },
     entry: ['./main.js', ...dev ? ['./hmrClient'] : []],
     output: {
       filename: dev ? '[name].js' : '[name].[contenthash:8].js',
