@@ -11,5 +11,5 @@ precacheAndRoute(self.__WB_MANIFEST.filter(({ url }) => ({
 }[url.split('.').pop()] ?? true)));
 cleanupOutdatedCaches();
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html'),
-  { denylist: [/\.(js|json|xml|hmr|webp|png|jpg|jpeg)(\?.*)?$/] }));
+  { denylist: [/\.(js|json|xml|hmr|webp|png|jpe?g)(\?.*)?$/] }));
 initialize();
