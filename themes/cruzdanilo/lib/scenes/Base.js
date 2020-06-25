@@ -51,7 +51,8 @@ export default class Base extends Scene {
 
   loadUI() {
     this.load.addFile(new ImageFile(this.load, 'ui', ui[Number(Features.webp)]));
-    this.load.addFile(new BitmapFontFile(this.load, 'dark', dark.texture, dark.fontData).files);
+    this.load.addFile(new BitmapFontFile(this.load, 'dark',
+      dark.textures[Number(Features.webp)], dark.fontData).files);
   }
 
   createMap() {
