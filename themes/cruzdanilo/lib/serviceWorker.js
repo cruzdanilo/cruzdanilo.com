@@ -10,5 +10,6 @@ precacheAndRoute(self.__WB_MANIFEST.filter(({ url }) => ({
   webp, png: !webp, jpg: !webp, jpeg: !webp,
 }[url.split('.').pop()] ?? true)));
 cleanupOutdatedCaches();
-registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html')));
+registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html'),
+  { denylist: [/\.(js|json|xml|hmr|webp|png|jpg|jpeg)(\?.*)?$/] }));
 initialize();
