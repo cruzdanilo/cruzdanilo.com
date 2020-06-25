@@ -11,8 +11,9 @@ const FRAME_KEY = 'post-frame';
 export default class Post extends Container {
   static preload(scene) {
     Post.loadFrame(scene);
+    const { webp } = scene.game.device.features;
     cruzdanilo.posts.forEach(({ path, cover }) => scene.load.addFile(new ImageFile(scene.load,
-      path, `${path}${cover}`)));
+      path, `${path}${cover[Number(webp)]}`)));
   }
 
   static loadFrame(scene) {

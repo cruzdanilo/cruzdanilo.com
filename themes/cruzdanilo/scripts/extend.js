@@ -184,7 +184,7 @@ hexo.extend.generator.register('asset', async (locals) => {
           ['cover', `.cover.${hashFormat}.png`, optipng, sharp(buffer)
             .resize(hexo.config.cover)
             .png({ compressionLevel: 0 })],
-          ['cover_webp', `.cover.${hashFormat}.webp`, (b) => b, sharp(buffer)
+          ['coverwebp', `.cover.${hashFormat}.webp`, (b) => b, sharp(buffer)
             .resize(hexo.config.cover)
             .webp({ quality: 75, reductionEffort: 6, smartSubsample: true })],
         ] : [],
@@ -195,7 +195,7 @@ hexo.extend.generator.register('asset', async (locals) => {
         hexo.log.info('[optimize]', filesize(buffer.length).padStart(9), '=>',
           filesize(data.length).padStart(9),
           cyan(`-${(1 - (data.length / buffer.length))
-            .toLocaleString(undefined, { style: 'percent' })}`.padStart(4)),
+            .toLocaleString(undefined, { style: 'percent' })}`.padStart(5)),
           magenta(optpath));
         await writeFile(path.join(cachePath, optpath), data);
         return [key, optname];
@@ -239,11 +239,17 @@ hexo.extend.generator.register('asset', async (locals) => {
   if (stats.hasErrors()) throw new Error(stats.errors);
 
   content = beautify(stringify({
-    posts: locals.posts.sort('-date').map((post) => ({
-      path: urlFor(post.path),
-      cover: PostAsset.findOne({ post: post._id, slug: post.cover }).cover,
-      photos: post.photos.map((slug) => PostAsset.findOne({ post: post._id, slug }).optslug),
-    })),
+    posts: locals.posts.sort('-date').map((post) => {
+      const { cover, coverwebp } = PostAsset.findOne({ post: post._id, slug: post.cover });
+      return {
+        path: urlFor(post.path),
+        cover: [cover, coverwebp],
+        photos: post.photos.map((slug) => {
+          const { optslug, webp } = PostAsset.findOne({ post: post._id, slug });
+          return [optslug, webp];
+        }),
+      };
+    }),
   }), { indent_size: 2 }).trim();
   entrypoints = [...stats.compilation.entrypoints.values()]
     .flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
