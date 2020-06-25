@@ -1,11 +1,11 @@
 import Base, { UI_HEIGHT } from './Base';
 import Post from '../objects/Post';
-import tilemap from '../assets/home.json';
-import tileset from '../assets/home.png.enc';
+import tilemap from '../assets/city.json';
+import tileset from '../assets/city.png.enc';
 
-export default class Home extends Base {
+export default class City extends Base {
   constructor() {
-    super(Home.KEY, tilemap, { home: tileset });
+    super(City.KEY, tilemap, { city: tileset });
   }
 
   preload() {
@@ -36,8 +36,8 @@ export default class Home extends Base {
 
   hot() {
     super.hot();
-    module.hot.accept(['../assets/home.json', '../assets/home.png.enc'],
-      () => this.refreshMap(tilemap, { home: tileset }));
+    module.hot.accept(['../assets/city.json', '../assets/city.png.enc'],
+      () => this.refreshMap(tilemap, { city: tileset }));
     module.hot.accept('../objects/Post', () => {
       Post.destroyAnimations(this);
       try { this.posts.forEach((post) => post.destroy()); } catch { /**/ }
@@ -47,4 +47,4 @@ export default class Home extends Base {
   }
 }
 
-Home.KEY = 'home';
+City.KEY = 'city';

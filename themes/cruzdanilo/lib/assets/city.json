@@ -241,11 +241,11 @@
         {
          "columns":24,
          "firstgid":1,
-         "image":"home.png",
+         "image":"city.png",
          "imageheight":256,
          "imagewidth":384,
          "margin":0,
-         "name":"home",
+         "name":"city",
          "spacing":0,
          "tilecount":384,
          "tileheight":16,
