@@ -1,5 +1,6 @@
 import BitmapText from 'phaser/src/gameobjects/bitmaptext/static/BitmapText';
 import BitmapFontFile from 'phaser/src/loader/filetypes/BitmapFontFile';
+import Features from 'phaser/src/device/Features';
 import FixedKeyControl from 'phaser/src/cameras/controls/FixedKeyControl';
 import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
 import NineSlice from 'phaser3-nineslice/src/NineSlice';
@@ -44,12 +45,12 @@ export default class Base extends Scene {
 
   loadMap() {
     this.load.addFile(new TilemapJSONFile(this.load, this.sys.config, this.mapSource));
-    Object.entries(this.tilesets)
-      .forEach(([name, file]) => this.load.addFile(new ImageFile(this.load, name, file)));
+    Object.entries(this.tilesets).forEach(([name, file]) => this.load
+      .addFile(new ImageFile(this.load, name, file[Number(Features.webp)])));
   }
 
   loadUI() {
-    this.load.addFile(new ImageFile(this.load, 'ui', ui));
+    this.load.addFile(new ImageFile(this.load, 'ui', ui[Number(Features.webp)]));
     this.load.addFile(new BitmapFontFile(this.load, 'dark', dark.texture, dark.fontData).files);
   }
 

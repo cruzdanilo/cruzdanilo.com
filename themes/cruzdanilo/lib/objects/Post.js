@@ -1,8 +1,9 @@
-import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
-import SpriteSheetFile from 'phaser/src/loader/filetypes/SpriteSheetFile';
 import Container from 'phaser/src/gameobjects/container/Container';
+import Features from 'phaser/src/device/Features';
 import Image from 'phaser/src/gameobjects/image/Image';
+import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
 import Sprite from 'phaser/src/gameobjects/sprite/Sprite';
+import SpriteSheetFile from 'phaser/src/loader/filetypes/SpriteSheetFile';
 
 import frame from '../assets/post-frame.png.enc';
 
@@ -11,14 +12,13 @@ const FRAME_KEY = 'post-frame';
 export default class Post extends Container {
   static preload(scene) {
     Post.loadFrame(scene);
-    const { webp } = scene.game.device.features;
     cruzdanilo.posts.forEach(({ path, cover }) => scene.load.addFile(new ImageFile(scene.load,
-      path, `${path}${cover[Number(webp)]}`)));
+      path, `${path}${cover[Number(Features.webp)]}`)));
   }
 
   static loadFrame(scene) {
     scene.load.addFile(new SpriteSheetFile(scene.load,
-      FRAME_KEY, frame, { frameWidth: 48, frameHeight: 64 }));
+      FRAME_KEY, frame[Number(Features.webp)], { frameWidth: 48, frameHeight: 64 }));
   }
 
   static createAnimations(scene) {

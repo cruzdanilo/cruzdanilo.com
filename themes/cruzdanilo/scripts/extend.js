@@ -36,7 +36,6 @@ const buildCompiler = (dev = !!server) => {
   const context = path.resolve(__dirname, '../lib');
   const outputPath = '_assets';
   bdfLoader = { loader: 'bdf2fnt-loader', options: { outputPath } };
-  const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
   const fileLoader = {
     loader: 'file-loader',
     options: {
@@ -48,6 +47,8 @@ const buildCompiler = (dev = !!server) => {
       },
     },
   };
+  const optimizeLoader = { loader: require.resolve('./optimize-loader'), options: fileLoader.options };
+  const decryptionLoader = { loader: 'decryption-loader', options: { password: process.env.DECRYPTION_PASSWORD } };
   compiler = webpack({
     context,
     mode: dev ? 'development' : 'production',
@@ -82,7 +83,7 @@ const buildCompiler = (dev = !!server) => {
                 }[path.basename(resource.substring(0, resource.indexOf('.font')))],
               },
             }, decryptionLoader],
-          }, { use: [fileLoader, decryptionLoader] }],
+          }, { use: [optimizeLoader, decryptionLoader] }],
         },
       ],
     },
