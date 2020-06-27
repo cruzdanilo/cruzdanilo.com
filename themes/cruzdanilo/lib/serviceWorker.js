@@ -1,6 +1,6 @@
 import { clientsClaim, skipWaiting } from 'workbox-core';
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
-import { initialize } from 'workbox-google-analytics';
+import { initialize as initializeAnalytics } from 'workbox-google-analytics';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
 
 const webp = new URLSearchParams(self.location.search).get('webp') === 'true';
@@ -12,4 +12,4 @@ precacheAndRoute(self.__WB_MANIFEST.filter(({ url }) => ({
 cleanupOutdatedCaches();
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html'),
   { denylist: [/\.(js|json|xml|hmr|webp|png|jpe?g)(\?.*)?$/] }));
-initialize();
+initializeAnalytics();
