@@ -107,12 +107,7 @@ export default class Base extends Scene {
   }
 
   reload(callback) {
-    const handleComplete = () => {
-      callback();
-      this.layout();
-      this.load.removeListener(COMPLETE_EVENT, handleComplete);
-    };
-    this.load.addListener(COMPLETE_EVENT, handleComplete);
+    this.load.once(COMPLETE_EVENT, () => { callback(); this.layout(); });
     this.load.start();
   }
 

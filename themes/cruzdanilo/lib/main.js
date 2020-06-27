@@ -45,10 +45,10 @@ new Promise((resolve) => {
 
   if (module.hot) {
     module.hot.accept();
-    module.hot.dispose(() => game.destroy());
+    module.hot.dispose(() => game.destroy(true));
     module.hot.accept('./scenes/Home', () => {
       game.scene.remove(Home.KEY);
-      game.scene.add(Home.KEY, Home, true);
+      game.scene.add(Home.KEY, new Home(), true);
     });
   }
 });
