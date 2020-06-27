@@ -60,7 +60,7 @@ const buildCompiler = (dev = !!server) => {
       publicPath: hexo.config.root,
     },
     infrastructureLogging: { level: 'none' },
-    stats: { colors: true, maxModules: Infinity },
+    stats: { colors: true, ...!dev && { maxModules: Infinity } },
     performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
     optimization: {
       minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
@@ -120,7 +120,6 @@ const buildCompiler = (dev = !!server) => {
       .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
   if (!server) return;
   wdm = webpackDevMiddleware(compiler);
-  server.use(wdm);
   const hot = webpackHotMiddleware(compiler, {
     path: '/webpack.hmr',
     log: (...args) => args.forEach((a) => a.split('\n').forEach((l) => hexo.log.info('[whm]', l))),
