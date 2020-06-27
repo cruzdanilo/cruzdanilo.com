@@ -53,7 +53,6 @@ const buildCompiler = (dev = !!server) => {
     context,
     mode: dev ? 'development' : 'production',
     devtool: dev && 'eval-source-map',
-    resolve: { symlinks: !dev },
     entry: ['./main.js', ...dev ? ['./hmrClient'] : []],
     output: {
       filename: dev ? '[name].js' : '[name].[contenthash:8].js',
@@ -110,6 +109,10 @@ const buildCompiler = (dev = !!server) => {
       }),
       ...dev ? [new HotModuleReplacementPlugin()] : [],
     ],
+    ...process.env.DEBUG && {
+      resolve: { symlinks: false },
+      cache: { type: 'memory', managedPaths: [] },
+    },
   });
   compiler.outputFileSystem = createFsFromVolume(new Volume());
   compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
