@@ -33,8 +33,8 @@
     "workbox-window": "^5.1.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.3",
-    "@babel/preset-env": "^7.10.3",
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "bdf2fnt-loader": "^3.0.0",
@@ -43,7 +43,7 @@
     "dotenv": "^8.2.0",
     "eslint": "^7.3.1",
     "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.1.0",
     "file-loader": "^6.0.0",
     "filesize": "^6.1.0",
@@ -65,9 +65,9 @@
     "png2fnt-loader": "^0.3.0",
     "sharp": "^0.25.4",
     "terser-webpack-plugin": "^3.0.6",
-    "webpack": "^5.0.0-beta.18",
+    "webpack": "^5.0.0-beta.20",
     "webpack-bundle-analyzer": "^3.8.0",
-    "webpack-dev-middleware": "^4.0.0-rc.1",
+    "webpack-dev-middleware": "^4.0.0-rc.2",
     "webpack-hot-middleware": "^2.25.0",
     "workbox-webpack-plugin": "^5.1.3"
   },
