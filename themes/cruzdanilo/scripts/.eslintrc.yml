@@ -12,3 +12,4 @@ rules:
     - error
     - allow:
       - _id
+      - _generate

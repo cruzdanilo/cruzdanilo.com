@@ -23,8 +23,7 @@ const {
 const urlFor = unboundUrlFor.bind(hexo);
 const cachePath = '.cache';
 const hashFormat = '[contenthash:8]';
-const revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
-
+let revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
 let compiler;
 let server;
 let wdm;
@@ -127,21 +126,26 @@ const buildCompiler = (dev = !!server) => {
   server.use(hot);
   const hashes = new Map();
   hexo.on('generateAfter', async () => {
-    const reload = (await Promise.all(hexo.route.list()
+    const modified = (await Promise.all(hexo.route.list()
       .filter((route) => !wdm.context.stats.compilation.assets[route])
       .filter((route) => hexo.route.isModified(route))
       .map(async (route) => {
-        const newHash = await new Promise((resolve, reject) => {
-          const hsh = createHash('md4');
-          hexo.route.get(route).pipe(hsh)
+        const hash = await new Promise((resolve, reject) => {
+          const hasher = createHash('md4');
+          hexo.route.get(route).pipe(hasher)
             .on('error', reject)
-            .on('finish', () => resolve(hsh.read().toString('hex')));
+            .on('finish', () => resolve(hasher.read().toString('hex')));
         });
         const lastHash = hashes.get(route);
-        hashes.set(route, newHash);
-        return !!lastHash && lastHash !== newHash;
-      }))).find(Boolean);
-    if (reload) hot.publish({ action: 'reload' });
+        hashes.set(route, hash);
+        return !!lastHash && lastHash !== hash && route;
+      }))).filter((route) => route);
+    if (modified.length) hot.publish({ action: 'reload' });
+    if (modified.includes('index.html')) {
+      revision = interpolateName({}, hashFormat, { content: new Date().toISOString() });
+      wdm.invalidate();
+      hexo._generate();
+    }
   });
 };
 
@@ -154,17 +158,18 @@ hexo.extend.generator.register('asset', async (locals) => {
   const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
   const PostAsset = hexo.model('PostAsset');
+  const route = (p, s, m) => ({ path: p, data: { modified: m, data: () => createReadStream(s) } });
   const assets = (await Promise.all([
     ...PostAsset.toArray(), ...hexo.model('Asset').toArray(),
   ].map(async (asset) => {
     if (!await exists(asset.source)) { asset.remove(); return []; }
     const original = asset.original || asset.path;
     const { dir, name, ext } = path.parse(original);
-    if (!['.png', '.jpg', '.jpeg']
-      .includes(ext)) return { path: original, data: () => createReadStream(asset.source) };
+    if (!['.png', '.jpg', '.jpeg'].includes(ext)) return route(original, asset.source, asset.modified);
     const { hash } = Cache.findById(asset._id);
     const sourceMeta = path.join(cachePath, `${original}.json5`);
     let output;
+    let modified = false;
     try {
       const meta = parse(await readFile(sourceMeta));
       if (hash !== meta.hash) throw new Error('invalid cache');
@@ -193,6 +198,7 @@ hexo.extend.generator.register('asset', async (locals) => {
             .webp({ quality: 75, reductionEffort: 6, smartSubsample: true })],
         ] : [],
       ].map(async ([key, suffix, optimizer, pipeline]) => {
+        modified = true;
         const data = await optimizer(await pipeline.toBuffer());
         const optname = interpolateName({}, `${name}${suffix}`, { content: data });
         const optpath = path.join(dir, optname);
@@ -207,10 +213,8 @@ hexo.extend.generator.register('asset', async (locals) => {
       await writeFile(sourceMeta, stringify({ hash, output }, null, 2));
     }
     await asset.update({ original, ...output, ...!asset.post && { path: output.optslug } });
-    return Object.values(output).map((slug) => ({
-      path: path.join(dir, slug),
-      data: () => createReadStream(path.join(cachePath, dir, slug)),
-    }));
+    return Object.values(output)
+      .map((slug) => route(path.join(dir, slug), path.join(cachePath, dir, slug), modified));
   }))).flat();
 
   if (!compiler) buildCompiler();
