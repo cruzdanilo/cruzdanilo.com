@@ -57,7 +57,8 @@ export default class Base extends Scene {
 
   createMap() {
     this.map = ParseToTilemap(this, this.sys.config);
-    Object.entries(this.tilesets).forEach(([name]) => this.map.addTilesetImage(name, name));
+    this.map.tilesets = this.map.tilesets.filter(({ name }) => name in this.tilesets);
+    this.map.tilesets.forEach(({ name }) => this.map.addTilesetImage(name, name));
     this.map.layers.forEach(({ name }) => this.map.createStaticLayer(name, this.map.tilesets));
   }
 
