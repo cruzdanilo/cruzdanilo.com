@@ -1,7 +1,7 @@
 import Base, { UI_HEIGHT } from './Base';
 import Post from '../objects/Post';
-import tilemap from '../assets/city.json';
-import tileset from '../assets/city.png.enc';
+import tilemap from '../assets/city/city.json';
+import tileset from '../assets/city/city.png.enc';
 
 export default class City extends Base {
   constructor() {
@@ -34,7 +34,7 @@ export default class City extends Base {
 
   hot() {
     super.hot();
-    module.hot.accept(['../assets/city.json', '../assets/city.png.enc'],
+    module.hot.accept(['../assets/city/city.json', '../assets/city/city.png.enc'],
       () => this.refreshMap(tilemap, { city: tileset }));
     module.hot.accept('../objects/Post', () => {
       Post.destroyAnimations(this);
