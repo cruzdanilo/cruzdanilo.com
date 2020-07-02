@@ -87,7 +87,7 @@ export default class Base extends Scene {
     this.mapSource = mapSource;
     this.tilesets = tilesets;
     this.cache.tilemap.remove(this.sys.config);
-    Object.keys(tilesets).forEach((name) => this.cache.image.remove(name));
+    Object.keys(tilesets).forEach((name) => this.textures.remove(name));
     this.loadMap();
     this.reload(() => {
       this.map.destroy();
@@ -96,7 +96,7 @@ export default class Base extends Scene {
   }
 
   refreshUI() {
-    this.cache.image.remove('ui');
+    this.textures.remove('ui');
     this.cache.bitmapFont.remove('dark');
     this.loadUI();
     this.reload(() => {

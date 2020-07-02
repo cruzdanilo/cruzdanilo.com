@@ -27,10 +27,8 @@ export default class City extends Base {
     const scale = super.layout(...args);
     this.posts.forEach((post, i) => {
       post.layout(scale);
-      post.setPosition(
-        (48 + (i % 4) * (48 + 16)) * scale,
-        (UI_HEIGHT + Math.floor(i / 4) * (64 + 16)) * scale,
-      );
+      post.setPosition((48 + (i % 4) * (48 + 16)) * scale,
+        (UI_HEIGHT + Math.floor(i / 4) * (64 + 16)) * scale);
     });
   }
 

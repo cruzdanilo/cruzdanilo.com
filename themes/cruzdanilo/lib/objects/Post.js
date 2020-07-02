@@ -79,7 +79,7 @@ export default class Post extends Container {
 
   hot() {
     module.hot.accept('../assets/post-frame.png.enc', () => {
-      this.scene.cache.image.remove(FRAME_KEY);
+      this.scene.textures.remove(FRAME_KEY);
       Post.loadFrame(this.scene);
       this.scene.reload(() => {
         try { this.frame.destroy(); } catch { /**/ }
