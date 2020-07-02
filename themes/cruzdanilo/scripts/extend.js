@@ -38,11 +38,10 @@ const buildCompiler = (dev = !!server) => {
   const fileLoader = {
     loader: 'file-loader',
     options: {
-      outputPath,
       name(resource) {
         const original = path.basename(resource, '.enc');
         const ext = path.extname(original);
-        return `${path.basename(original, ext)}.${hashFormat}${ext}`;
+        return `_[path]${path.basename(original, ext)}.${hashFormat}${ext}`;
       },
     },
   };

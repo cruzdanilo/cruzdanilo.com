@@ -1,4 +1,3 @@
-const { join } = require('path').posix;
 const { getOptions, interpolateName } = require('loader-utils');
 const optipng = require('imagemin-optipng')();
 const sharp = require('sharp');
@@ -7,7 +6,7 @@ const done = new Map();
 
 module.exports = async function loader(content) {
   this.async();
-  const { name, outputPath } = getOptions(this) || {};
+  const { name } = getOptions(this) || {};
   const contenthash = interpolateName(this, '[contenthash]', { content });
   if (!done.has(contenthash)) {
     done.set(contenthash, await Promise.all([
@@ -15,9 +14,9 @@ module.exports = async function loader(content) {
       ['.webp', (b) => b, sharp(content).webp({ quality: 100, lossless: true, reductionEffort: 6 })],
     ].map(async ([ext, optimizer, pipeline]) => {
       const data = await optimizer(await pipeline.toBuffer());
-      const filepath = join(outputPath, interpolateName({
+      const filepath = interpolateName({
         ...this, resourcePath: this.resourcePath.replace(/\.png(?!.*\.png)/, ext),
-      }, name, { content: data }));
+      }, name, { context: this.rootContext, content: data });
       this.emitFile(filepath, data);
       return filepath;
     })));
