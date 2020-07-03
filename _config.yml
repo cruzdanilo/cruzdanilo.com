@@ -14,12 +14,10 @@ cover:
   width: 54 # 27
   height: 82 # 41
 manifest:
-  path: manifest.json
-  data:
-    name: cruzdanilo
-    short_name: cruzdanilo
-    start_url: /
-    orientation: landscape
-    theme_color: black
-    background_color: black
-    display: standalone
+  name: cruzdanilo
+  short_name: cruzdanilo
+  start_url: /
+  orientation: landscape
+  theme_color: black
+  background_color: black
+  display: standalone

@@ -30,6 +30,7 @@ let server;
 let wdm;
 let bdfLoader;
 let content;
+let manifest;
 let entrypoints;
 
 const buildCompiler = (dev = !!server) => {
@@ -157,12 +158,9 @@ hexo.model('PostAsset').schema.virtual('path').get(function () {
 });
 hexo.log.time = (msg, ...hrtime) => hexo.log.debug(msg, cyan(prettyHrtime(hrtime)));
 hexo.extend.filter.register('server_middleware', (app) => { server = app; });
-hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
+hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, manifest, entrypoints }));
 hexo.extend.filter.register('before_exit', () => compiler && new Promise((r) => compiler.close(r)));
 hexo.extend.generator.register('asset', async (locals) => {
-  const manifest = {
-    path: hexo.config.manifest.path, data: JSON.stringify(hexo.config.manifest.data, null, 2),
-  };
   const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
   const PostAsset = hexo.model('PostAsset');
@@ -224,11 +222,16 @@ hexo.extend.generator.register('asset', async (locals) => {
     return Object.values(output)
       .map((slug) => route(path.join(dir, slug), path.join(cachePath, dir, slug), modified));
   }))).flat();
+  const manifestData = JSON.stringify(hexo.config.manifest, null, 2);
+  const manifestRoute = {
+    path: interpolateName({}, `manifest.${hashFormat}.json`, { content: manifestData }),
+    data: manifestData,
+  };
 
   if (!compiler) buildCompiler();
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
-      ...['index.html', manifest.path]
+      ...['index.html', manifestRoute.path]
         .map((file) => ({ url: path.resolve(hexo.config.root, file), revision })),
       ...assets.map((asset) => ({ url: urlFor(asset.path), revision: null })),
     ],
@@ -255,6 +258,7 @@ hexo.extend.generator.register('asset', async (locals) => {
   });
   if (stats.hasErrors()) throw new Error(stats.errors);
 
+  manifest = urlFor(manifestRoute.path);
   content = beautify(stringify({
     posts: locals.posts.sort('-date').map((post) => {
       const { cover, coverwebp } = PostAsset.findOne({ post: post._id, slug: post.cover });
@@ -271,7 +275,7 @@ hexo.extend.generator.register('asset', async (locals) => {
   entrypoints = [...stats.compilation.entrypoints.values()]
     .flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
   return [
-    manifest,
+    manifestRoute,
     ...assets,
     ...Object.keys(stats.compilation.assets).map((f) => ({
       path: f,
