@@ -154,6 +154,9 @@ hexo.model('PostAsset').schema.virtual('path').get(function () {
 hexo.extend.filter.register('server_middleware', (app) => { server = app; });
 hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
 hexo.extend.generator.register('asset', async (locals) => {
+  const manifest = {
+    path: hexo.config.manifest.path, data: JSON.stringify(hexo.config.manifest.data, null, 2),
+  };
   const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
   const PostAsset = hexo.model('PostAsset');
@@ -219,7 +222,8 @@ hexo.extend.generator.register('asset', async (locals) => {
   if (!compiler) buildCompiler();
   Object.assign(compiler.options.plugins.find((p) => p instanceof InjectManifest).config, {
     additionalManifestEntries: [
-      { url: path.resolve(hexo.config.root, 'index.html'), revision },
+      ...['index.html', manifest.path]
+        .map((file) => ({ url: path.resolve(hexo.config.root, file), revision })),
       ...assets.map((asset) => ({ url: urlFor(asset.path), revision: null })),
     ],
   });
@@ -261,6 +265,7 @@ hexo.extend.generator.register('asset', async (locals) => {
   entrypoints = [...stats.compilation.entrypoints.values()]
     .flatMap((e) => e.chunks.map(({ files: [f] }) => f)).map(urlFor);
   return [
+    manifest,
     ...assets,
     ...Object.keys(stats.compilation.assets).map((f) => ({
       path: f,
