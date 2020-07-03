@@ -10,3 +10,5 @@ report.html
 *.bdf
 *.log
 *.png
+*.tps
+*.xcf
