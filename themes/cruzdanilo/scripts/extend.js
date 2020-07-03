@@ -62,7 +62,7 @@ const buildCompiler = (dev = !!server) => {
     infrastructureLogging: { level: 'none' },
     stats: { colors: true, ...!dev && { maxModules: Infinity } },
     performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
-    cache: { type: 'filesystem', ...process.env.DEBUG && { managedPaths: [] } },
+    cache: { type: 'filesystem', buildDependencies: { config: [__filename] } },
     optimization: {
       minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
     },
