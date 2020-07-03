@@ -1,5 +1,6 @@
 import BitmapText from 'phaser/src/gameobjects/bitmaptext/static/BitmapText';
 import BitmapFontFile from 'phaser/src/loader/filetypes/BitmapFontFile';
+import Container from 'phaser/src/gameobjects/container/Container';
 import Features from 'phaser/src/device/Features';
 import FixedKeyControl from 'phaser/src/cameras/controls/FixedKeyControl';
 import ImageFile from 'phaser/src/loader/filetypes/ImageFile';
@@ -60,21 +61,25 @@ export default class Base extends Scene {
     this.map.tilesets = this.map.tilesets.filter(({ name }) => name in this.tilesets);
     this.map.tilesets.forEach(({ name }) => this.map.addTilesetImage(name, name));
     this.map.layers.forEach(({ name }) => this.map.createStaticLayer(name, this.map.tilesets));
+    this.sprites = this.children.add(new Container(this, 0, UI_HEIGHT, this.map.imageCollections
+      ?.flatMap(({ name: key, images }) => images
+        .flatMap(({ gid, image: frame }) => this.map.objects
+          .flatMap(({ name }) => this.map.createFromObjects(name, gid, { key, frame }))))));
   }
 
   createUI() {
-    this.ui = this.sys.displayList.add(new NineSlice(this,
+    this.ui = this.children.add(new NineSlice(this,
       { sourceKey: 'ui', sourceLayout: { width: 70, height: 39 } },
       { width: this.map.widthInPixels, height: UI_HEIGHT }));
-    this.text = this.sys.displayList.add(new BitmapText(this,
+    this.text = this.children.add(new BitmapText(this,
       24, 24, 'dark', 'DANILO NEVES CRUZ\nGAME DEVELOPER')).setTint(0xffb9000);
   }
 
   layout(size = this.scale.gameSize) {
     const scale = Math.max(2, Math.floor(size.width / this.map.widthInPixels));
-    this.map.layers.forEach(({ tilemapLayer }) => {
-      tilemapLayer.setPosition(0, UI_HEIGHT * scale);
-      tilemapLayer.setScale(scale);
+    [...this.map.layers.map((l) => l.tilemapLayer), this.sprites].forEach((layer) => {
+      layer.setPosition(0, UI_HEIGHT * scale);
+      layer.setScale(scale);
     });
     this.ui.setScale(scale);
     this.ui.resize(this.map.widthInPixels, UI_HEIGHT);
@@ -91,7 +96,7 @@ export default class Base extends Scene {
     Object.keys(tilesets).forEach((name) => this.textures.remove(name));
     this.loadMap();
     this.reload(() => {
-      this.map.destroy();
+      this.stage.destroy();
       this.createMap();
     });
   }

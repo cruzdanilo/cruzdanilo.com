@@ -1,6 +1,7 @@
 import 'phaser/src/cameras/2d/CameraManager';
 import 'phaser/src/gameobjects/DisplayList';
 import 'phaser/src/gameobjects/UpdateList';
+import 'phaser/src/gameobjects/sprite/SpriteCreator';
 import 'phaser/src/input/InputPlugin';
 import 'phaser/src/input/keyboard/KeyboardPlugin';
 import 'phaser/src/loader/LoaderPlugin';

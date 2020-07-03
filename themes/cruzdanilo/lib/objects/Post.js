@@ -43,7 +43,7 @@ export default class Post extends Container {
   }
 
   static add(scene, i, x, y) {
-    return scene.sys.displayList.add(new Post(scene, i, x, y));
+    return scene.children.add(new Post(scene, i, x, y));
   }
 
   static addAll(scene, points) {
