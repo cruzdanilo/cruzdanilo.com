@@ -12,7 +12,7 @@ import { RESIZE } from 'phaser/src/scale/const/SCALE_MODE_CONST';
 import Game from 'phaser/src/core/Game';
 import Features from 'phaser/src/device/Features';
 
-import Home from './scenes/Home';
+import Home from './scenes/City';
 import info from '../../../package.json';
 
 new Promise((resolve) => {
@@ -47,7 +47,7 @@ new Promise((resolve) => {
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => game.destroy(true));
-    module.hot.accept('./scenes/Home', () => {
+    module.hot.accept('./scenes/City', () => {
       game.scene.remove(Home.KEY);
       game.scene.add(Home.KEY, new Home(), true);
     });
