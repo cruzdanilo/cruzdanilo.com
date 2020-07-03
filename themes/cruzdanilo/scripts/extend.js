@@ -60,6 +60,7 @@ const buildCompiler = (dev = !!server) => {
     infrastructureLogging: { level: 'none' },
     stats: { colors: true, ...!dev && { maxModules: Infinity } },
     performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
+    cache: { type: 'filesystem', ...process.env.DEBUG && { managedPaths: [] } },
     optimization: {
       minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
     },
@@ -107,15 +108,13 @@ const buildCompiler = (dev = !!server) => {
       }),
       ...dev ? [new HotModuleReplacementPlugin()] : [],
     ],
-    ...process.env.DEBUG && {
-      resolve: { symlinks: false },
-      cache: { type: 'memory', managedPaths: [] },
-    },
   });
   compiler.outputFileSystem = createFsFromVolume(new Volume());
-  compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => args
-    .forEach((arg) => arg.split('\n')
-      .forEach((l) => hexo.log[level](`[${{ 'webpack-dev-middleware': 'wdm' }[name] || name}]`, l))));
+  compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => level in hexo.log
+   && args.forEach((arg) => String(arg).split('\n').forEach((l) => hexo.log[level](`[${{
+     'webpack-dev-middleware': 'wdm',
+     'webpack.cache.PackFileCacheStrategy': 'cache',
+   }[name] || name}]`, l))));
   if (!server) return;
   wdm = webpackDevMiddleware(compiler);
   const hot = webpackHotMiddleware(compiler, {
@@ -153,6 +152,7 @@ hexo.model('PostAsset').schema.virtual('path').get(function () {
 });
 hexo.extend.filter.register('server_middleware', (app) => { server = app; });
 hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
+hexo.extend.filter.register('before_exit', () => compiler && new Promise((r) => compiler.close(r)));
 hexo.extend.generator.register('asset', async (locals) => {
   const manifest = {
     path: hexo.config.manifest.path, data: JSON.stringify(hexo.config.manifest.data, null, 2),

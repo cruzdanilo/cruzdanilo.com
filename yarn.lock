@@ -1484,10 +1484,10 @@ basic-auth@~2.0.1:
   dependencies:
     safe-buffer "5.1.2"
 
-bdf2fnt-loader@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/bdf2fnt-loader/-/bdf2fnt-loader-3.0.1.tgz#8fe178a1ad557f22113c3524122e7312e4907f4b"
-  integrity sha512-zZ5qVFkg8T15W/jiXqSMD9xZoTY4fEEp/gH8bxKmpKl749xWjoimKqZ0D5hA9M4yscUSwFDa8mMnfu8MS1rjQg==
+bdf2fnt-loader@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/bdf2fnt-loader/-/bdf2fnt-loader-3.0.2.tgz#4137457bcfa76295cbfdd274fc26aa57d1f21f41"
+  integrity sha512-W1M5+abbet/UoYSlz6iVgy2xCk0LnzHcM2mk6t54XCFtaoD73LH8HXb1kEDDaDvpJqlLWIJUd/M5yy/8jbrTpQ==
   dependencies:
     bdfjs "0.0.8"
     imagemin-optipng "^8.0.0"
@@ -2517,9 +2517,9 @@ ejs@^2.6.1:
   integrity sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
 
 electron-to-chromium@^1.3.483:
-  version "1.3.484"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.484.tgz#75f5a1eee5fe3168758b7c2cf375ae73c1ccf5e6"
-  integrity sha512-esh5mmjAGl6HhAaYgHlDZme+jCIc+XIrLrBTwxviE+pM64UBmdLUIHLlrPzJGbit7hQI1TR/oGDQWCvQZ5yrFA==
+  version "1.3.487"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.487.tgz#8075e6ea33ee2e79a2dfb2a2467033f014017258"
+  integrity sha512-m4QS3IDShxauFfYFpnEzRCcUI55oKB9acEnHCuY/hSCZMz9Pz2KJj+UBnGHxRxS/mS1aphqOQ5wI6gc3yDZ7ew==
 
 emoji-regex@^7.0.1:
   version "7.0.3"
@@ -5633,10 +5633,10 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-png2fnt-loader@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/png2fnt-loader/-/png2fnt-loader-0.3.1.tgz#034f56ec5f1f03eb93d50f84409181771760542f"
-  integrity sha512-kRsQe3OhfHfFyE62ZBbesXafgU+FRQgf+uIFypbxwY0rU68zq6L6T+G/eY1OEgkeBmzgVwfKfCCUvf74C8cToA==
+png2fnt-loader@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/png2fnt-loader/-/png2fnt-loader-0.3.2.tgz#f88af34e4eac3d877fbd06edb9c3d10cdf6f161d"
+  integrity sha512-adLmoJZPUF1w5Wv62PpuBeghQrjdxtFAzGpD9XvdhNPVcD2UIYDabqSpB5r02q0cB8QhTukAsPqBuT1Qjozefw==
   dependencies:
     imagemin-optipng "^8.0.0"
     loader-utils "^2.0.0"

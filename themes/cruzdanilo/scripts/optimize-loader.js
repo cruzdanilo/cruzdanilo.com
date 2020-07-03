@@ -17,7 +17,7 @@ module.exports = async function loader(content) {
       const filepath = interpolateName({
         ...this, resourcePath: this.resourcePath.replace(/\.png(?!.*\.png)/, ext),
       }, name, { context: this.rootContext, content: data });
-      this.emitFile(filepath, data);
+      this.emitFile(filepath, data, false, { immutable: true });
       return filepath;
     })));
   }
