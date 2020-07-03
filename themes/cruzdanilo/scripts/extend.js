@@ -12,6 +12,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { default: webpackDevMiddleware } = require('webpack-dev-middleware');
 const TerserPlugin = require('terser-webpack-plugin');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const prettyHrtime = require('pretty-hrtime');
 const filesize = require('filesize');
 const optipng = require('imagemin-optipng')();
 const sharp = require('sharp');
@@ -110,11 +111,15 @@ const buildCompiler = (dev = !!server) => {
     ],
   });
   compiler.outputFileSystem = createFsFromVolume(new Volume());
-  compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => level in hexo.log
-   && args.forEach((arg) => String(arg).split('\n').forEach((l) => hexo.log[level](`[${{
-     'webpack-dev-middleware': 'wdm',
-     'webpack.cache.PackFileCacheStrategy': 'cache',
-   }[name] || name}]`, l))));
+  compiler.hooks.infrastructureLog.tap('cruzdanilo', (name, level, args) => {
+    const label = `[${{
+      'webpack-dev-middleware': 'wdm',
+      'webpack.cache.PackFileCacheStrategy': 'cache',
+    }[name] || name}]`;
+    const log = (arg0, ...rest) => hexo.log[level](`${label} ${arg0}`, ...rest);
+    if (args.length > 1) log(...args);
+    else String(args[0]).split('\n').forEach((l) => log(l));
+  });
   if (!server) return;
   wdm = webpackDevMiddleware(compiler);
   const hot = webpackHotMiddleware(compiler, {
@@ -150,6 +155,7 @@ const buildCompiler = (dev = !!server) => {
 hexo.model('PostAsset').schema.virtual('path').get(function () {
   return path.join(hexo.model('Post').findById(this.post).path, this.optslug || this.slug);
 });
+hexo.log.time = (msg, ...hrtime) => hexo.log.debug(msg, cyan(prettyHrtime(hrtime)));
 hexo.extend.filter.register('server_middleware', (app) => { server = app; });
 hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, entrypoints }));
 hexo.extend.filter.register('before_exit', () => compiler && new Promise((r) => compiler.close(r)));
