@@ -59,11 +59,16 @@ const buildCompiler = (dev = !!server) => {
       path: context,
       publicPath: hexo.config.root,
     },
+    cache: {
+      type: 'filesystem',
+      buildDependencies: { config: [__filename] },
+      ...process.env.DEBUG && { managedPaths: [] },
+    },
+    ...process.env.DEBUG && { resolve: { symlinks: false } },
     experiments: { topLevelAwait: true },
     infrastructureLogging: { level: 'none' },
     stats: { colors: true, ...!dev && { maxModules: Infinity } },
     performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
-    cache: { type: 'filesystem', buildDependencies: { config: [__filename] } },
     optimization: {
       minimizer: [new TerserPlugin({ parallel: true, terserOptions: { safari10: true } })],
     },
