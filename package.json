@@ -9,7 +9,7 @@
   "author": "danilo neves cruz <cruzdanilo@gmail.com> (https://cruzdanilo.com)",
   "scripts": {
     "postinstall": "patch-package",
-    "start": "hexo server --output .cache",
+    "start": "hexo serve --output .cache",
     "build": "hexo generate --output .cache",
     "rebuild": "hexo generate --output .cache --force",
     "clean": "hexo clean --output .cache",
