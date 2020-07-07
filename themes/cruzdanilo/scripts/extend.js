@@ -165,7 +165,8 @@ hexo.model('PostAsset').schema.virtual('path').get(function () {
 hexo.log.time = (msg, ...hrtime) => hexo.log.debug(msg, cyan(prettyHrtime(hrtime)));
 hexo.extend.filter.register('server_middleware', (app) => { server = app; });
 hexo.extend.filter.register('template_locals', (l) => Object.assign(l, { content, manifest, entrypoints }));
-hexo.extend.filter.register('before_exit', () => compiler && new Promise((r) => compiler.close(r)));
+hexo.extend.filter.register('before_exit', () => compiler && !hexo.theme.isWatching()
+  && new Promise((resolve) => compiler.close(resolve)));
 hexo.extend.generator.register('asset', async (locals) => {
   const Post = hexo.model('Post');
   const Cache = hexo.model('Cache');
