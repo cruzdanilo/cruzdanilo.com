@@ -59,6 +59,7 @@ const buildCompiler = (dev = !!server) => {
       path: context,
       publicPath: hexo.config.root,
     },
+    experiments: { topLevelAwait: true },
     infrastructureLogging: { level: 'none' },
     stats: { colors: true, ...!dev && { maxModules: Infinity } },
     performance: { maxAssetSize: 666 * 1024, maxEntrypointSize: 666 * 1024 },
