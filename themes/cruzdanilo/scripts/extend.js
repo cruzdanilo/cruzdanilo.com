@@ -64,7 +64,7 @@ const buildCompiler = (dev = !!server) => {
       buildDependencies: { config: [__filename] },
       ...process.env.DEBUG && { managedPaths: [] },
     },
-    ...process.env.DEBUG && { resolve: { symlinks: false } },
+    resolve: { symlinks: !dev },
     experiments: { topLevelAwait: true },
     infrastructureLogging: { level: 'none' },
     stats: { colors: true, ...!dev && { maxModules: Infinity } },
