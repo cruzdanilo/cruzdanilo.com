@@ -60,11 +60,13 @@ export default class Base extends Scene {
     this.map = ParseToTilemap(this, this.sys.config);
     this.map.tilesets = this.map.tilesets.filter(({ name }) => name in this.tilesets);
     this.map.tilesets.forEach(({ name }) => this.map.addTilesetImage(name, name));
-    this.map.layers.forEach(({ name }) => this.map.createStaticLayer(name, this.map.tilesets));
-    this.sprites = this.children.add(new Container(this, 0, UI_HEIGHT, this.map.imageCollections
-      ?.flatMap(({ name: key, images }) => images
-        .flatMap(({ gid, image: frame }) => this.map.objects
-          .flatMap(({ name }) => this.map.createFromObjects(name, gid, { key, frame }))))));
+    this.stage = this.children.add(new Container(this, 0, UI_HEIGHT));
+    this.stage.add(this.map.layers
+      .map(({ name }) => this.map.createStaticLayer(name, this.map.tilesets)));
+    if (!this.map.imageCollections) return;
+    this.stage.add(this.map.imageCollections.flatMap(({ name: key, images }) => images
+      .flatMap(({ gid, image: frame }) => this.map.objects
+        .flatMap(({ name }) => this.map.createFromObjects(name, gid, { key, frame })))));
   }
 
   createUI() {
@@ -77,10 +79,8 @@ export default class Base extends Scene {
 
   layout(size = this.scale.gameSize) {
     const scale = Math.max(2, Math.floor(size.width / this.map.widthInPixels));
-    [...this.map.layers.map((l) => l.tilemapLayer), this.sprites].forEach((layer) => {
-      layer.setPosition(0, UI_HEIGHT * scale);
-      layer.setScale(scale);
-    });
+    this.stage.setPosition(0, UI_HEIGHT * scale);
+    this.stage.setScale(scale);
     this.ui.setScale(scale);
     this.ui.resize(this.map.widthInPixels, UI_HEIGHT);
     this.text.setScale(scale);
